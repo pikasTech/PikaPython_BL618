@@ -1,6 +1,6 @@
 /*
- * This file is part of the PikaScript project.
- * http://github.com/pikastech/pikascript
+ * This file is part of the PikaPython project.
+ * http://github.com/pikastech/pikapython
  *
  * MIT License
  *
@@ -25,7 +25,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef __DATA_QUEUE__H
 #define __DATA_QUEUE__H
 #include "dataArgs.h"
@@ -83,4 +85,7 @@ uint_fast16_t byteQueue_getPeekedNumber(ByteQueue *queue);
 uint_fast16_t byteQueue_peekAvailableCount(ByteQueue *queue);
 PIKA_BOOL byteQueue_writeOne(ByteQueue *queue, uint8_t byte);
 
+#endif
+#ifdef __cplusplus
+}
 #endif

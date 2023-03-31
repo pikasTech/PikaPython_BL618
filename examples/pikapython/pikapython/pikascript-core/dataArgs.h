@@ -1,6 +1,6 @@
 /*
- * This file is part of the PikaScript project.
- * http://github.com/pikastech/pikascript
+ * This file is part of the PikaPython project.
+ * http://github.com/pikastech/pikapython
  *
  * MIT License
  *
@@ -24,6 +24,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef _dataArgs__H
 #define _dataArgs__H
@@ -107,8 +111,8 @@ PIKA_RES args_setPtrWithType(Args* self,
                              ArgType type,
                              void* objPtr);
 PIKA_RES args_foreach(Args* self,
-                      int32_t (*eachHandle)(Arg* argEach, Args* context),
-                      Args* context);
+                      int32_t (*eachHandle)(Arg* argEach, void* context),
+                      void* context);
 
 char* args_getBuff(Args* self, int32_t size);
 PIKA_RES args_pushArg(Args* self, Arg* arg);
@@ -243,6 +247,9 @@ static inline Arg* pikaTuple_getArg(PikaTuple* self, int index) {
 }
 
 static inline size_t pikaTuple_getSize(PikaTuple* self) {
+    if (self == NULL) {
+        return 0;
+    }
     return pikaList_getSize((&((self)->super)));
 }
 
@@ -275,4 +282,8 @@ char* strsFormatList(Args* out_buffs, char* fmt, PikaList* list);
 char* args_cacheStr(Args* self, char* str);
 char* strsFormatArg(Args* out_buffs, char* fmt, Arg* arg);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

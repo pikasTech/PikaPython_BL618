@@ -1,3 +1,5 @@
+#ifndef _LCD_CONF_USER_H_
+#define _LCD_CONF_USER_H_
 
 /* clang-format off */
 
@@ -20,7 +22,7 @@
     LCD_SPI_ST7796
     LCD_SPI_ST7789V
 */
-#define LCD_DBI_ILI9488
+#define LCD_SPI_ST7796
 
 /* dbi ili9488 config */
 #if defined LCD_DBI_ILI9488
@@ -56,41 +58,6 @@
         1: enable
     */
    #define ILI9488_DBI_COLOR_REVERSAL 0
-
-/* dbi ili9341 config */
-#elif defined LCD_DBI_ILI9341
-
-    /* Selecting interface type, more configuration of peripherals comes later
-        1: DBI peripheral, supported functions: typeC-3wire, typeC-4wire, typeB-x8(8080); (support chips: bl616, bl606p, bl808),
-        2: PEC simulation, supported functions: typeB-x8; (support chips: bl616),
-    */
-    #define LCD_DBI_INTERFACE_TYPE 1
-
-    /* enable the lcd reset function
-        0: Does not care about lcd hard reset
-        1: use gpio to reset the lcd
-    */
-    #define LCD_RESET_EN 1
-
-    /* Selecting pixel format
-        1: rgb565 (16-bit, output rgb565)
-        2: nrgb8888 (32-bit, output rgb888)
-    */
-    #define ILI9341_DBI_PIXEL_FORMAT 1
-
-    /* ILI9341 LCD width and height */
-    #define ILI9341_DBI_W 240
-    #define ILI9341_DBI_H 320
-
-    /* The offset of the area can be displayed */
-    #define ILI9341_DBI_OFFSET_X 0
-    #define ILI9341_DBI_OFFSET_Y 0
-
-    /* Color reversal, Some screens are required
-        0: disable
-        1: enable
-    */
-   #define ILI9341_DBI_COLOR_REVERSAL 0
 
 #endif
 
@@ -340,7 +307,7 @@
         0: disable
         1: enable
     */
-   #define ST7796_SPI_COLOR_REVERSAL 0
+   #define ST7796_SPI_COLOR_REVERSAL 1
 
 #endif
 
@@ -482,11 +449,11 @@
     #define LCD_SPI_HARD_4_PIXEL_CNT_MAX (800 * 640)
 
     /* spi pin, hardware controlled */
-    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_13
-    #define LCD_SPI_HARD_4_PIN_DAT   GPIO_PIN_15
+    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_9
+    #define LCD_SPI_HARD_4_PIN_DAT   GPIO_PIN_19
     /* cs/dc pin, software controlled */
-    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_14
-    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_16
+    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_17
+    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_18
 
 #endif
 
@@ -494,7 +461,7 @@
 #if (defined(LCD_RESET_EN) && LCD_RESET_EN)
 
 /* lcd reset signal pin, please leave blank if not needed */
-#define LCD_RESET_PIN GPIO_PIN_12
+#define LCD_RESET_PIN GPIO_PIN_2
 
 /* lcd reset signal active level
     0: lcd reset at low level
@@ -507,5 +474,9 @@
 
 /* lcd recovery time after reset end (ms) */
 #define LCD_RESET_DELAY   100
+
+#endif
+
+/* clang-format on */
 
 #endif

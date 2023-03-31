@@ -1,6 +1,6 @@
 /*
- * This file is part of the PikaScript project.
- * http://github.com/pikastech/pikascript
+ * This file is part of the PikaPython project.
+ * http://github.com/pikastech/pikapython
  *
  * MIT License
  *
@@ -72,3 +72,4 @@ add_filter_msg(bye_pika,    "###bye pika", .is_case_insensitive = PIKA_TRUE)
 #if defined(__clang__)
 #   pragma clang diagnostic pop
 #endif
+

@@ -1,6 +1,6 @@
 ﻿/*
- * This file is part of the PikaScript project.
- * http://github.com/pikastech/pikascript
+ * This file is part of the PikaPython project.
+ * http://github.com/pikastech/pikapython
  *
  * MIT License
  *
@@ -98,7 +98,7 @@ PIKA_WEAK int64_t pika_platform_get_tick(void) {
     return platform_uptime_ms();
 #elif defined(__linux)
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts);
     return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 #else
     return -1;
@@ -585,5 +585,9 @@ PIKA_WEAK void pika_platform_thread_timer_usleep(unsigned long usec) {
 }
 
 PIKA_WEAK void pika_platform_reboot(void) {
+    WEAK_FUNCTION_NEED_OVERRIDE_ERROR();
+}
+
+PIKA_WEAK void pika_platform_clear(void) {
     WEAK_FUNCTION_NEED_OVERRIDE_ERROR();
 }
