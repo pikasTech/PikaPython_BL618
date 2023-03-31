@@ -54,7 +54,7 @@ PikaObj *pikaScriptInit(void){
             "import machine\n"
             "import example\n"
             "import json\n"
-            "import BLMCU\n"
+            "import bouffalo\n"
             "print('hello PikaPython!')\n"
             "\n");
 #else 

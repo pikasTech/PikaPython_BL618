@@ -9,19 +9,19 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __BLMCU_Camera__H
-#define __BLMCU_Camera__H
+#ifndef __bouffalo_Camera__H
+#define __bouffalo_Camera__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_BLMCU_Camera(Args *args);
+PikaObj *New_bouffalo_Camera(Args *args);
 
-void BLMCU_Camera___init__(PikaObj *self);
-int BLMCU_Camera_get_frame_count(PikaObj *self);
-PikaObj* BLMCU_Camera_get_frame_info(PikaObj *self);
-void BLMCU_Camera_pop_one_frame(PikaObj *self);
-void BLMCU_Camera_start(PikaObj *self);
-void BLMCU_Camera_stop(PikaObj *self);
+void bouffalo_Camera___init__(PikaObj *self);
+int bouffalo_Camera_get_frame_count(PikaObj *self);
+PikaObj* bouffalo_Camera_get_frame_info(PikaObj *self);
+void bouffalo_Camera_pop_one_frame(PikaObj *self);
+void bouffalo_Camera_start(PikaObj *self);
+void bouffalo_Camera_stop(PikaObj *self);
 
 #endif

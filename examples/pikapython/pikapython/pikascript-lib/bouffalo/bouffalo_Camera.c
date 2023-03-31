@@ -1,4 +1,4 @@
-#include "BLMCU_Camera.h"
+#include "bouffalo_Camera.h"
 
 #include "bflb_i2c.h"
 #include "bflb_cam.h"
@@ -11,7 +11,7 @@ static struct bflb_device_s *cam0;
 static struct bflb_cam_config_s cam_config;
 static struct image_sensor_config_s *sensor_config;
 
-void BLMCU_Camera___init__(PikaObj *self) {
+void bouffalo_Camera___init__(PikaObj *self) {
     board_dvp_gpio_init();
 
     i2c0 = bflb_device_get_by_name("i2c0");
@@ -35,25 +35,25 @@ void BLMCU_Camera___init__(PikaObj *self) {
     bflb_cam_init(cam0, &cam_config);
 }
 
-void BLMCU_Camera_start(PikaObj *self) {
+void bouffalo_Camera_start(PikaObj *self) {
     bflb_cam_start(cam0);
 }
 
-void BLMCU_Camera_stop(PikaObj *self) {
+void bouffalo_Camera_stop(PikaObj *self) {
     bflb_cam_stop(cam0);
 }
 
-int BLMCU_Camera_get_frame_count(PikaObj *self) {
+int bouffalo_Camera_get_frame_count(PikaObj *self) {
     return (int)bflb_cam_get_frame_count(cam0);
 }
 
-PikaObj* BLMCU_Camera_get_frame_info(PikaObj *self) {
+PikaObj* bouffalo_Camera_get_frame_info(PikaObj *self) {
     uint8_t *pic;
     uint32_t pic_size;
     pic_size = bflb_cam_get_frame_info(cam0, &pic);
     return obj_newTuple(arg_newInt((int32_t)pic), arg_newInt(pic_size));
 }
 
-void BLMCU_Camera_pop_one_frame(PikaObj *self) {
+void bouffalo_Camera_pop_one_frame(PikaObj *self) {
     bflb_cam_pop_one_frame(cam0);
 }

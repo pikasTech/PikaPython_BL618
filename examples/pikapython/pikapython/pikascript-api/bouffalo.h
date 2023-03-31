@@ -9,14 +9,14 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __BLMCU__H
-#define __BLMCU__H
+#ifndef __bouffalo__H
+#define __bouffalo__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_BLMCU(Args *args);
+PikaObj *New_bouffalo(Args *args);
 
-Arg* BLMCU_Camera(PikaObj *self);
+Arg* bouffalo_Camera(PikaObj *self);
 
 #endif

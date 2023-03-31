@@ -1,5 +1,5 @@
 #include "bflb_dac.h"
-#include "pika_hal_BLMCU_common.h"
+#include "pika_hal_bouffalo_common.h"
 
 static int8_t _pin2ch(uint32_t pin) {
     switch (pin) {

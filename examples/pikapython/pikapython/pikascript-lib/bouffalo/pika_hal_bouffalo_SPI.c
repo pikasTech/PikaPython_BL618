@@ -1,4 +1,4 @@
-#include "pika_hal_BLMCU_common.h"
+#include "pika_hal_bouffalo_common.h"
 #include "bflb_spi.h"
 #include "bflb_dma.h"
 #include "board.h"

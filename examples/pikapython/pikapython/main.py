@@ -14,5 +14,5 @@ import _thread
 import machine
 import example
 import json
-import BLMCU
+import bouffalo
 print('hello PikaPython!')

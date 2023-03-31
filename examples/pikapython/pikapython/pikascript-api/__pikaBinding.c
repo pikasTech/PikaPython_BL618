@@ -12,17 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "BaseObj.h"
-#include "BLMCU.h"
-#include "TinyObj.h"
-#include "BLMCU_Camera.h"
-#include "TinyObj.h"
 #include "PikaDebug.h"
 #include "TinyObj.h"
 #include "PikaDebug_Debuger.h"
 #include "TinyObj.h"
 #include "PikaMain.h"
 #include "PikaStdLib_SysObj.h"
-#include "BLMCU.h"
 #include "PikaMath.h"
 #include "PikaStdData.h"
 #include "PikaStdDevice.h"
@@ -31,6 +26,7 @@
 #include "_thread.h"
 #include "_time.h"
 #include "binascii.h"
+#include "bouffalo.h"
 #include "pika_cjson.h"
 #include "pika_lvgl.h"
 #include "random.h"
@@ -107,6 +103,10 @@
 #include "_time.h"
 #include "TinyObj.h"
 #include "binascii.h"
+#include "TinyObj.h"
+#include "bouffalo.h"
+#include "TinyObj.h"
+#include "bouffalo_Camera.h"
 #include "TinyObj.h"
 #include "pika_cjson.h"
 #include "TinyObj.h"
@@ -213,102 +213,6 @@
 #include "re_Pattern.h"
 #include "TinyObj.h"
 
-#ifndef PIKA_MODULE_BLMCU_DISABLE
-void BLMCU_CameraMethod(PikaObj *self, Args *args){
-    Arg* res = BLMCU_Camera(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    BLMCU_Camera,
-    "Camera", ""
-);
-
-class_def(BLMCU){
-    __BEFORE_MOETHOD_DEF
-    constructor_def(BLMCU_Camera, 725709262),
-};
-class_inhert(BLMCU, TinyObj);
-
-PikaObj *New_BLMCU(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, BLMCU);
-    return self;
-}
-#endif
-
-#ifndef PIKA_MODULE_BLMCU_DISABLE
-void BLMCU_Camera___init__Method(PikaObj *self, Args *args){
-    BLMCU_Camera___init__(self);
-}
-method_typedef(
-    BLMCU_Camera___init__,
-    "__init__", ""
-);
-
-void BLMCU_Camera_get_frame_countMethod(PikaObj *self, Args *args){
-    int res = BLMCU_Camera_get_frame_count(self);
-    method_returnInt(args, res);
-}
-method_typedef(
-    BLMCU_Camera_get_frame_count,
-    "get_frame_count", ""
-);
-
-void BLMCU_Camera_get_frame_infoMethod(PikaObj *self, Args *args){
-    PikaObj* res = BLMCU_Camera_get_frame_info(self);
-    method_returnObj(args, res);
-}
-method_typedef(
-    BLMCU_Camera_get_frame_info,
-    "get_frame_info", ""
-);
-
-void BLMCU_Camera_pop_one_frameMethod(PikaObj *self, Args *args){
-    BLMCU_Camera_pop_one_frame(self);
-}
-method_typedef(
-    BLMCU_Camera_pop_one_frame,
-    "pop_one_frame", ""
-);
-
-void BLMCU_Camera_startMethod(PikaObj *self, Args *args){
-    BLMCU_Camera_start(self);
-}
-method_typedef(
-    BLMCU_Camera_start,
-    "start", ""
-);
-
-void BLMCU_Camera_stopMethod(PikaObj *self, Args *args){
-    BLMCU_Camera_stop(self);
-}
-method_typedef(
-    BLMCU_Camera_stop,
-    "stop", ""
-);
-
-class_def(BLMCU_Camera){
-    __BEFORE_MOETHOD_DEF
-    method_def(BLMCU_Camera_pop_one_frame, 43554815),
-    method_def(BLMCU_Camera_start, 274811347),
-    method_def(BLMCU_Camera_get_frame_info, 420658746),
-    method_def(BLMCU_Camera___init__, 904762485),
-    method_def(BLMCU_Camera_get_frame_count, 989773559),
-    method_def(BLMCU_Camera_stop, 2090736459),
-};
-class_inhert(BLMCU_Camera, TinyObj);
-
-PikaObj *New_BLMCU_Camera(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, BLMCU_Camera);
-    return self;
-}
-
-Arg *BLMCU_Camera(PikaObj *self){
-    return obj_newObjInPackage(New_BLMCU_Camera);
-}
-#endif
-
 #ifndef PIKA_MODULE_PIKADEBUG_DISABLE
 void PikaDebug_DebugerMethod(PikaObj *self, Args *args){
     Arg* res = PikaDebug_Debuger(self);
@@ -375,7 +279,6 @@ class_inhert(PikaMain, PikaStdLib_SysObj);
 
 PikaObj *New_PikaMain(Args *args){
     PikaObj *self = New_PikaStdLib_SysObj(args);
-    obj_newObj(self, "BLMCU", "BLMCU", New_BLMCU);
     obj_newObj(self, "PikaMath", "PikaMath", New_PikaMath);
     obj_newObj(self, "PikaStdData", "PikaStdData", New_PikaStdData);
     obj_newObj(self, "PikaStdDevice", "PikaStdDevice", New_PikaStdDevice);
@@ -384,6 +287,7 @@ PikaObj *New_PikaMain(Args *args){
     obj_newObj(self, "_thread", "_thread", New__thread);
     obj_newObj(self, "_time", "_time", New__time);
     obj_newObj(self, "binascii", "binascii", New_binascii);
+    obj_newObj(self, "bouffalo", "bouffalo", New_bouffalo);
     obj_newObj(self, "pika_cjson", "pika_cjson", New_pika_cjson);
     obj_newObj(self, "pika_lvgl", "pika_lvgl", New_pika_lvgl);
     obj_newObj(self, "random", "random", New_random);
@@ -5028,6 +4932,102 @@ PikaObj *New_binascii(Args *args){
     PikaObj *self = New_TinyObj(args);
     obj_setClass(self, binascii);
     return self;
+}
+#endif
+
+#ifndef PIKA_MODULE_BOUFFALO_DISABLE
+void bouffalo_CameraMethod(PikaObj *self, Args *args){
+    Arg* res = bouffalo_Camera(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    bouffalo_Camera,
+    "Camera", ""
+);
+
+class_def(bouffalo){
+    __BEFORE_MOETHOD_DEF
+    constructor_def(bouffalo_Camera, 725709262),
+};
+class_inhert(bouffalo, TinyObj);
+
+PikaObj *New_bouffalo(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, bouffalo);
+    return self;
+}
+#endif
+
+#ifndef PIKA_MODULE_BOUFFALO_DISABLE
+void bouffalo_Camera___init__Method(PikaObj *self, Args *args){
+    bouffalo_Camera___init__(self);
+}
+method_typedef(
+    bouffalo_Camera___init__,
+    "__init__", ""
+);
+
+void bouffalo_Camera_get_frame_countMethod(PikaObj *self, Args *args){
+    int res = bouffalo_Camera_get_frame_count(self);
+    method_returnInt(args, res);
+}
+method_typedef(
+    bouffalo_Camera_get_frame_count,
+    "get_frame_count", ""
+);
+
+void bouffalo_Camera_get_frame_infoMethod(PikaObj *self, Args *args){
+    PikaObj* res = bouffalo_Camera_get_frame_info(self);
+    method_returnObj(args, res);
+}
+method_typedef(
+    bouffalo_Camera_get_frame_info,
+    "get_frame_info", ""
+);
+
+void bouffalo_Camera_pop_one_frameMethod(PikaObj *self, Args *args){
+    bouffalo_Camera_pop_one_frame(self);
+}
+method_typedef(
+    bouffalo_Camera_pop_one_frame,
+    "pop_one_frame", ""
+);
+
+void bouffalo_Camera_startMethod(PikaObj *self, Args *args){
+    bouffalo_Camera_start(self);
+}
+method_typedef(
+    bouffalo_Camera_start,
+    "start", ""
+);
+
+void bouffalo_Camera_stopMethod(PikaObj *self, Args *args){
+    bouffalo_Camera_stop(self);
+}
+method_typedef(
+    bouffalo_Camera_stop,
+    "stop", ""
+);
+
+class_def(bouffalo_Camera){
+    __BEFORE_MOETHOD_DEF
+    method_def(bouffalo_Camera_pop_one_frame, 43554815),
+    method_def(bouffalo_Camera_start, 274811347),
+    method_def(bouffalo_Camera_get_frame_info, 420658746),
+    method_def(bouffalo_Camera___init__, 904762485),
+    method_def(bouffalo_Camera_get_frame_count, 989773559),
+    method_def(bouffalo_Camera_stop, 2090736459),
+};
+class_inhert(bouffalo_Camera, TinyObj);
+
+PikaObj *New_bouffalo_Camera(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, bouffalo_Camera);
+    return self;
+}
+
+Arg *bouffalo_Camera(PikaObj *self){
+    return obj_newObjInPackage(New_bouffalo_Camera);
 }
 #endif
 

@@ -196,19 +196,18 @@ static void usb_cdc_fflush_task(void* pvParameters) {
     }
 }
 
-int main(void) {
-    board_init();
-
-    // label_tfcard_state_update(!filesystem_init());
+static void init_filesystem(void) {
     filesystem_init();
+}
 
-    struct bflb_device_s* gpio;
-    gpio = bflb_device_get_by_name("gpio");
+static void init_gpio(struct bflb_device_s **gpio) {
+    *gpio = bflb_device_get_by_name("gpio");
     /* backlight pin */
-    bflb_gpio_init(gpio, GPIO_PIN_2,
-                   GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
-    bflb_gpio_set(gpio, GPIO_PIN_2);
+    bflb_gpio_init(*gpio, GPIO_PIN_2, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+    bflb_gpio_set(*gpio, GPIO_PIN_2);
+}
 
+static void init_lvgl(void) {
 #if USING_LVGL
     /* lvgl init */
     lv_log_register_print_cb(lv_log_print_g_cb);
@@ -216,36 +215,21 @@ int main(void) {
     lv_port_disp_init();
     lv_port_indev_init();
 
-    // demo();
-
     LOG_I("lvgl success\r\n");
 #endif
+}
 
+static void init_adc(struct bflb_device_s *gpio) {
     /* ADC_CH0 */
     bflb_gpio_init(gpio, GPIO_PIN_20, GPIO_ANALOG | GPIO_SMT_EN | GPIO_DRV_0);
     /* ADC_CH3 */
     bflb_gpio_init(gpio, GPIO_PIN_3, GPIO_ANALOG | GPIO_SMT_EN | GPIO_DRV_0);
     /* adc init */
     adc_init();
+}
 
+static void init_cam(struct bflb_device_s *gpio) {
     /* DVP0 GPIO init */
-    /* I2C GPIO */
-    // bflb_gpio_init(gpio, GPIO_PIN_0, GPIO_FUNC_I2C0 | GPIO_ALTERNATE |
-    // GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1); bflb_gpio_init(gpio, GPIO_PIN_1,
-    // GPIO_FUNC_I2C0 | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-    // GPIO_DRV_1);
-
-    /* Power down GPIO */
-    bflb_gpio_init(gpio, GPIO_PIN_16,
-                   GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
-    bflb_gpio_reset(gpio, GPIO_PIN_16);
-
-    /* MCLK GPIO */
-    bflb_gpio_init(gpio, GPIO_PIN_6,
-                   GPIO_FUNC_CLKOUT | GPIO_ALTERNATE | GPIO_PULLUP |
-                       GPIO_SMT_EN | GPIO_DRV_1);
-
-    /* DVP0 GPIO */
     bflb_gpio_init(gpio, GPIO_PIN_24,
                    GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
                        GPIO_DRV_1);
@@ -279,41 +263,64 @@ int main(void) {
     bflb_gpio_init(gpio, GPIO_PIN_34,
                    GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
                        GPIO_DRV_1);
-    cam_init();
 
+    cam_init();
+}
+
+static void init_uart(void) {
 #if !USING_USB_CDC
     uartx = bflb_device_get_by_name("uart0");
 #endif
+}
+
+static void create_tasks(void) {
 #if PIKA_FREERTOS_ENABLE
 #if USING_KEY_ERAISE
-    xTaskCreate(_erase_app_task, (char*)"erase_app_task", 8192, NULL,
+    xTaskCreate(_erase_app_task, (char *)"erase_app_task", 8192, NULL,
                 configMAX_PRIORITIES - 1, NULL);
 #endif
-    xTaskCreate(consumer_task, (char*)"consumer_task", 8 * 1024, NULL, 3, NULL);
+    xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
 #if USING_USB_CDC
-    xTaskCreate(usb_cdc_fflush_task, (char*)"usb_cdc_fflush_task", 1024, NULL,
+    xTaskCreate(usb_cdc_fflush_task, (char *)"usb_cdc_fflush_task", 1024, NULL,
                 1, NULL);
 #endif
 #if USING_LVGL
-    xTaskCreate(lvgl_task, (char*)"lvgl_task", 8 * 1024, NULL,
-    configMAX_PRIORITIES - 2, NULL);
+    xTaskCreate(lvgl_task, (char *)"lvgl_task", 8 * 1024, NULL,
+                configMAX_PRIORITIES - 2, NULL);
 #endif
     vTaskStartScheduler();
-#else
-    consumer_task(NULL);
 #endif
+}
+
+int main(void) {
+    board_init();
+
+    init_filesystem();
+
+    struct bflb_device_s *gpio;
+    init_gpio(&gpio);
+
+    init_lvgl();
+
+    init_adc(gpio);
+
+    init_cam(gpio);
+
+    init_uart();
+
+    create_tasks();
+
     while (1) {
         /* delay */
-        #if PIKA_FREERTOS_ENABLE
+#if PIKA_FREERTOS_ENABLE
         vTaskDelay(10);
-        #else
+#else
         bflb_mtimer_delay_ms(10);
-        #endif
+#endif
     }
 }
 
 /* Platform Porting */
-
 char pika_platform_getchar(void) {
 #if !USING_USB_CDC
     while (1) {
