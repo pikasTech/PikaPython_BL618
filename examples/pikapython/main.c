@@ -72,7 +72,6 @@
 #endif
 
 struct bflb_device_s* uartx = NULL;
-// static uint8_t freertos_heap[configTOTAL_HEAP_SIZE];
 
 volatile FILE g_pika_app_flash_file = {0};
 volatile int g_pika_app_flash_pos = 0;
@@ -82,12 +81,6 @@ volatile int g_pika_app_flash_pos = 0;
 #define _PIKA_APP_FLASH_INITED 0xFE
 #define _PIKA_APP_FLASH_VOID 0xFF
 #define _PIKA_APP_FLASH_SAVED 0x0F
-
-// static HeapRegion_t xHeapRegions[] = {
-//     {(uint8_t*)freertos_heap, 0},
-//     {NULL, 0}, /* Terminates the array. */
-//     {NULL, 0}  /* Terminates the array. */
-// };
 
 static struct bflb_device_s* cam0;
 static struct bflb_device_s* adc;
@@ -190,14 +183,8 @@ void lv_log_print_g_cb(const char* buf) {
 }
 
 static void lvgl_task(void* pvParameters) {
-    // lv_port_indev_init();
-
-    // lv_demo_benchmark();
-    // lv_demo_stress();
-
     while (1) {
         lv_task_handler();
-        // bflb_mtimer_delay_ms(1);
         vTaskDelay(1);
     }
 }
@@ -296,12 +283,7 @@ int main(void) {
 
 #if !USING_USB_CDC
     uartx = bflb_device_get_by_name("uart0");
-// bflb_uart_feature_control(uartx, UART_CMD_SET_BAUD_RATE, 115200);
 #endif
-    // xHeapRegions[0].xSizeInBytes = configTOTAL_HEAP_SIZE;
-    // vPortDefineHeapRegions(xHeapRegions);
-    // printf("Heap size: %d\r\n", configTOTAL_HEAP_SIZE);
-
 #if PIKA_FREERTOS_ENABLE
 #if USING_KEY_ERAISE
     xTaskCreate(_erase_app_task, (char*)"erase_app_task", 8192, NULL,
@@ -313,19 +295,20 @@ int main(void) {
                 1, NULL);
 #endif
 #if USING_LVGL
-    xTaskCreate(lvgl_task, (char*)"lvgl_task", 8 * 1024, NULL, 2, NULL);
+    xTaskCreate(lvgl_task, (char*)"lvgl_task", 8 * 1024, NULL,
+    configMAX_PRIORITIES - 2, NULL);
 #endif
     vTaskStartScheduler();
 #else
     consumer_task(NULL);
 #endif
     while (1) {
-#if USING_LVGL
-        lv_task_handler();
-        bflb_mtimer_delay_ms(1);
-#else
-// You can add other tasks or functions to be executed if not using LVGL.
-#endif
+        /* delay */
+        #if PIKA_FREERTOS_ENABLE
+        vTaskDelay(10);
+        #else
+        bflb_mtimer_delay_ms(10);
+        #endif
     }
 }
 
