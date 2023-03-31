@@ -10,6 +10,6 @@ re==v0.1.1
 binascii==v0.0.1
 modbus==v0.0.4
 time==v0.1.3
-pika_lvgl==v0.4.4
+pika_lvgl==latest
 _thread==v0.0.3
 random==v0.1.1

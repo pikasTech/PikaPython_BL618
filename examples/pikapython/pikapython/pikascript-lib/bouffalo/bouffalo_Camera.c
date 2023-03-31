@@ -2,7 +2,9 @@
 
 #include "bflb_i2c.h"
 #include "bflb_cam.h"
+#include "bflb_gpio.h"
 #include "image_sensor.h"
+#include "lvgl.h"
 #include "board.h"
 
 // Global variables
@@ -11,28 +13,9 @@ static struct bflb_device_s *cam0;
 static struct bflb_cam_config_s cam_config;
 static struct image_sensor_config_s *sensor_config;
 
+void init_cam(struct bflb_device_s *gpio);
 void bouffalo_Camera___init__(PikaObj *self) {
-    board_dvp_gpio_init();
-
-    i2c0 = bflb_device_get_by_name("i2c0");
-    cam0 = bflb_device_get_by_name("cam0");
-
-    if (image_sensor_scan(i2c0, &sensor_config)) {
-        pika_platform_printf("\r\nSensor name: %s\r\n", sensor_config->name);
-    } else {
-        pika_platform_printf("\r\nError! Can't identify sensor!\r\n");
-        while (1) {
-        }
-    }
-
-    memcpy(&cam_config, sensor_config, IMAGE_SENSOR_INFO_COPY_SIZE);
-    cam_config.with_mjpeg = false;
-    cam_config.input_source = CAM_INPUT_SOURCE_DVP;
-    cam_config.output_format = CAM_OUTPUT_FORMAT_AUTO;
-    cam_config.output_bufaddr = BFLB_PSRAM_BASE;
-    cam_config.output_bufsize = cam_config.resolution_x * cam_config.resolution_y * 8;
-
-    bflb_cam_init(cam0, &cam_config);
+    init_cam(bflb_device_get_by_name("gpio"));
 }
 
 void bouffalo_Camera_start(PikaObj *self) {
@@ -56,4 +39,34 @@ PikaObj* bouffalo_Camera_get_frame_info(PikaObj *self) {
 
 void bouffalo_Camera_pop_one_frame(PikaObj *self) {
     bflb_cam_pop_one_frame(cam0);
+}
+
+static lv_obj_t *canvas_cam;
+
+static lv_obj_t *canvas_cam_create(lv_obj_t *parent);
+
+void demo(void) {
+    canvas_cam = canvas_cam_create(lv_scr_act());
+}
+
+void canvas_cam_update(void *pic_addr) {
+    if (!canvas_cam) {
+        return;
+    }
+
+    lv_obj_t *canvas = canvas_cam;
+    lv_canvas_set_buffer(canvas, pic_addr, 320, 240, LV_IMG_CF_TRUE_COLOR);
+}
+
+static lv_obj_t *canvas_cam_create(lv_obj_t *parent) {
+    lv_obj_t *canvas;
+    canvas = lv_canvas_create(parent);
+    lv_obj_set_size(canvas, 320, 240);
+    lv_obj_align(canvas, LV_ALIGN_TOP_MID, 0, 0);
+
+    return canvas;
+}
+
+void bouffalo_Camera_demo(PikaObj *self) {
+    demo();
 }

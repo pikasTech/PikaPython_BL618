@@ -38,3 +38,8 @@ class Camera:
         Pop the next frame from the camera module's frame buffer.
         This should be called after retrieving frame information using get_frame_info().
         """
+
+    def demo(self):
+        """
+        Run a demo of the camera module.
+        """

@@ -88,6 +88,7 @@ static struct bflb_device_s* adc;
 static int filesystem_init(void);
 static void cam_init(void);
 static void adc_init(void);
+void init_cam(struct bflb_device_s *gpio);
 
 static int _pika_app_check(void) {
     uint8_t buf = {0};
@@ -127,6 +128,9 @@ static void consumer_task(void* pvParameters) {
     cdc_acm_init();
 #endif
     vTaskDelay(1000);
+
+    // init_cam(bflb_device_get_by_name("gpio"));
+
 #if USING_KEY_ERAISE
     struct bflb_device_s* gpio = bflb_device_get_by_name("gpio");
     bflb_gpio_init(gpio, GPIO_PIN_33,
@@ -228,41 +232,31 @@ static void init_adc(struct bflb_device_s *gpio) {
     adc_init();
 }
 
-static void init_cam(struct bflb_device_s *gpio) {
+void init_cam(struct bflb_device_s *gpio) {
     /* DVP0 GPIO init */
-    bflb_gpio_init(gpio, GPIO_PIN_24,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_25,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_26,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_27,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_28,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_29,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_30,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_31,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_32,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_33,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
-    bflb_gpio_init(gpio, GPIO_PIN_34,
-                   GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN |
-                       GPIO_DRV_1);
+    /* I2C GPIO */
+    // bflb_gpio_init(gpio, GPIO_PIN_0, GPIO_FUNC_I2C0 | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    // bflb_gpio_init(gpio, GPIO_PIN_1, GPIO_FUNC_I2C0 | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+
+    /* Power down GPIO */
+    bflb_gpio_init(gpio, GPIO_PIN_16, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_reset(gpio, GPIO_PIN_16);
+
+    /* MCLK GPIO */
+    bflb_gpio_init(gpio, GPIO_PIN_6, GPIO_FUNC_CLKOUT | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+
+    /* DVP0 GPIO */
+    bflb_gpio_init(gpio, GPIO_PIN_24, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_25, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_26, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_27, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_28, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_29, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_30, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_31, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_32, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_33, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
+    bflb_gpio_init(gpio, GPIO_PIN_34, GPIO_FUNC_CAM | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
 
     cam_init();
 }
@@ -303,8 +297,6 @@ int main(void) {
     init_lvgl();
 
     init_adc(gpio);
-
-    init_cam(gpio);
 
     init_uart();
 
@@ -482,9 +474,9 @@ static void cam_init(void) {
     cam0 = bflb_device_get_by_name("cam0");
 
     if (image_sensor_scan(i2c0, &sensor_config)) {
-        LOG_I("\r\nSensor name: %s\r\n", sensor_config->name);
+        pika_debug("\r\nSensor name: %s\r\n", sensor_config->name);
     } else {
-        LOG_E("\r\nError! Can't identify sensor!\r\n");
+        pika_platform_printf("\r\nError! Can't identify sensor!\r\n");
         cam0 = NULL;
         return;
     }
@@ -503,6 +495,7 @@ static void cam_init(void) {
     bflb_cam_init(cam0, &cam_config);
     bflb_cam_start(cam0);
 
+    pika_debug("cam init ok");
     // bflb_cam_stop(cam0);
 }
 
@@ -592,7 +585,7 @@ static void cam_isr(int irq, void* arg) {
     for (size_t i = 0; i < pic_size / sizeof(uint16_t); i++) {
         pic_addr[i] = __bswap16(pic_addr[i]);
     }
-    // canvas_cam_update(pic_addr);
+    canvas_cam_update(pic_addr);
 }
 
 static void dma0_ch0_isr(void* arg) {

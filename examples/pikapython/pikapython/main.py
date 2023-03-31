@@ -14,5 +14,5 @@ import _thread
 import machine
 import example
 import json
-import bouffalo
+import bouffalo as bf
 print('hello PikaPython!')

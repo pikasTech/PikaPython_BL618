@@ -33,6 +33,8 @@ void pika_lvgl___init__(PikaObj *self);
 Arg* pika_lvgl_arc(PikaObj *self);
 Arg* pika_lvgl_bar(PikaObj *self);
 Arg* pika_lvgl_btn(PikaObj *self);
+Arg* pika_lvgl_canvas(PikaObj *self);
+Arg* pika_lvgl_cf_t(PikaObj *self);
 Arg* pika_lvgl_checkbox(PikaObj *self);
 Arg* pika_lvgl_dropdown(PikaObj *self);
 Arg* pika_lvgl_flag_t(PikaObj *self);

@@ -26,7 +26,7 @@ PikaObj *pikaScriptInit(void){
     __platform_printf("json==v0.1.1\r\n");
     __platform_printf("modbus==v0.0.4\r\n");
     __platform_printf("pika_cjson==v1.2.2\r\n");
-    __platform_printf("pika_lvgl==v0.4.4\r\n");
+    __platform_printf("pika_lvgl==latest\r\n");
     __platform_printf("random==v0.1.1\r\n");
     __platform_printf("re==v0.1.1\r\n");
     __platform_printf("time==v0.1.3\r\n");
@@ -54,7 +54,7 @@ PikaObj *pikaScriptInit(void){
             "import machine\n"
             "import example\n"
             "import json\n"
-            "import bouffalo\n"
+            "import bouffalo as bf\n"
             "print('hello PikaPython!')\n"
             "\n");
 #else 
