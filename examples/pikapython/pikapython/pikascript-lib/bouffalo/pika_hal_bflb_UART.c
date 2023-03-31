@@ -1,6 +1,6 @@
 #include "bflb_uart.h"
 #include "bflb_gpio.h"
-#include "pika_hal_bouffalo_common.h"
+#include "pika_hal_bflb_common.h"
 
 typedef struct platform_uart_t {
     struct bflb_device_s* device;

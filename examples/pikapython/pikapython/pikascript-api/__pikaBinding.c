@@ -25,8 +25,8 @@
 #include "_modbus.h"
 #include "_thread.h"
 #include "_time.h"
+#include "bflb.h"
 #include "binascii.h"
-#include "bouffalo.h"
 #include "pika_cjson.h"
 #include "pika_lvgl.h"
 #include "random.h"
@@ -102,11 +102,11 @@
 #include "TinyObj.h"
 #include "_time.h"
 #include "TinyObj.h"
+#include "bflb.h"
+#include "TinyObj.h"
+#include "bflb_Camera.h"
+#include "TinyObj.h"
 #include "binascii.h"
-#include "TinyObj.h"
-#include "bouffalo.h"
-#include "TinyObj.h"
-#include "bouffalo_Camera.h"
 #include "TinyObj.h"
 #include "pika_cjson.h"
 #include "TinyObj.h"
@@ -290,8 +290,8 @@ PikaObj *New_PikaMain(Args *args){
     obj_newObj(self, "_modbus", "_modbus", New__modbus);
     obj_newObj(self, "_thread", "_thread", New__thread);
     obj_newObj(self, "_time", "_time", New__time);
+    obj_newObj(self, "bflb", "bflb", New_bflb);
     obj_newObj(self, "binascii", "binascii", New_binascii);
-    obj_newObj(self, "bouffalo", "bouffalo", New_bouffalo);
     obj_newObj(self, "pika_cjson", "pika_cjson", New_pika_cjson);
     obj_newObj(self, "pika_lvgl", "pika_lvgl", New_pika_lvgl);
     obj_newObj(self, "random", "random", New_random);
@@ -4904,6 +4904,111 @@ PikaObj *New__time(Args *args){
 }
 #endif
 
+#ifndef PIKA_MODULE_BFLB_DISABLE
+void bflb_CameraMethod(PikaObj *self, Args *args){
+    Arg* res = bflb_Camera(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    bflb_Camera,
+    "Camera", ""
+);
+
+class_def(bflb){
+    __BEFORE_MOETHOD_DEF
+    constructor_def(bflb_Camera, 725709262),
+};
+class_inhert(bflb, TinyObj);
+
+PikaObj *New_bflb(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, bflb);
+    return self;
+}
+#endif
+
+#ifndef PIKA_MODULE_BFLB_DISABLE
+void bflb_Camera___init__Method(PikaObj *self, Args *args){
+    bflb_Camera___init__(self);
+}
+method_typedef(
+    bflb_Camera___init__,
+    "__init__", ""
+);
+
+void bflb_Camera_demoMethod(PikaObj *self, Args *args){
+    bflb_Camera_demo(self);
+}
+method_typedef(
+    bflb_Camera_demo,
+    "demo", ""
+);
+
+void bflb_Camera_get_frame_countMethod(PikaObj *self, Args *args){
+    int res = bflb_Camera_get_frame_count(self);
+    method_returnInt(args, res);
+}
+method_typedef(
+    bflb_Camera_get_frame_count,
+    "get_frame_count", ""
+);
+
+void bflb_Camera_get_frame_infoMethod(PikaObj *self, Args *args){
+    PikaObj* res = bflb_Camera_get_frame_info(self);
+    method_returnObj(args, res);
+}
+method_typedef(
+    bflb_Camera_get_frame_info,
+    "get_frame_info", ""
+);
+
+void bflb_Camera_pop_one_frameMethod(PikaObj *self, Args *args){
+    bflb_Camera_pop_one_frame(self);
+}
+method_typedef(
+    bflb_Camera_pop_one_frame,
+    "pop_one_frame", ""
+);
+
+void bflb_Camera_startMethod(PikaObj *self, Args *args){
+    bflb_Camera_start(self);
+}
+method_typedef(
+    bflb_Camera_start,
+    "start", ""
+);
+
+void bflb_Camera_stopMethod(PikaObj *self, Args *args){
+    bflb_Camera_stop(self);
+}
+method_typedef(
+    bflb_Camera_stop,
+    "stop", ""
+);
+
+class_def(bflb_Camera){
+    __BEFORE_MOETHOD_DEF
+    method_def(bflb_Camera_pop_one_frame, 43554815),
+    method_def(bflb_Camera_start, 274811347),
+    method_def(bflb_Camera_get_frame_info, 420658746),
+    method_def(bflb_Camera___init__, 904762485),
+    method_def(bflb_Camera_get_frame_count, 989773559),
+    method_def(bflb_Camera_demo, 2090181002),
+    method_def(bflb_Camera_stop, 2090736459),
+};
+class_inhert(bflb_Camera, TinyObj);
+
+PikaObj *New_bflb_Camera(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, bflb_Camera);
+    return self;
+}
+
+Arg *bflb_Camera(PikaObj *self){
+    return obj_newObjInPackage(New_bflb_Camera);
+}
+#endif
+
 #ifndef PIKA_MODULE_BINASCII_DISABLE
 void binascii_a2b_hexMethod(PikaObj *self, Args *args){
     char* val = args_getStr(args, "val");
@@ -4936,111 +5041,6 @@ PikaObj *New_binascii(Args *args){
     PikaObj *self = New_TinyObj(args);
     obj_setClass(self, binascii);
     return self;
-}
-#endif
-
-#ifndef PIKA_MODULE_BOUFFALO_DISABLE
-void bouffalo_CameraMethod(PikaObj *self, Args *args){
-    Arg* res = bouffalo_Camera(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    bouffalo_Camera,
-    "Camera", ""
-);
-
-class_def(bouffalo){
-    __BEFORE_MOETHOD_DEF
-    constructor_def(bouffalo_Camera, 725709262),
-};
-class_inhert(bouffalo, TinyObj);
-
-PikaObj *New_bouffalo(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, bouffalo);
-    return self;
-}
-#endif
-
-#ifndef PIKA_MODULE_BOUFFALO_DISABLE
-void bouffalo_Camera___init__Method(PikaObj *self, Args *args){
-    bouffalo_Camera___init__(self);
-}
-method_typedef(
-    bouffalo_Camera___init__,
-    "__init__", ""
-);
-
-void bouffalo_Camera_demoMethod(PikaObj *self, Args *args){
-    bouffalo_Camera_demo(self);
-}
-method_typedef(
-    bouffalo_Camera_demo,
-    "demo", ""
-);
-
-void bouffalo_Camera_get_frame_countMethod(PikaObj *self, Args *args){
-    int res = bouffalo_Camera_get_frame_count(self);
-    method_returnInt(args, res);
-}
-method_typedef(
-    bouffalo_Camera_get_frame_count,
-    "get_frame_count", ""
-);
-
-void bouffalo_Camera_get_frame_infoMethod(PikaObj *self, Args *args){
-    PikaObj* res = bouffalo_Camera_get_frame_info(self);
-    method_returnObj(args, res);
-}
-method_typedef(
-    bouffalo_Camera_get_frame_info,
-    "get_frame_info", ""
-);
-
-void bouffalo_Camera_pop_one_frameMethod(PikaObj *self, Args *args){
-    bouffalo_Camera_pop_one_frame(self);
-}
-method_typedef(
-    bouffalo_Camera_pop_one_frame,
-    "pop_one_frame", ""
-);
-
-void bouffalo_Camera_startMethod(PikaObj *self, Args *args){
-    bouffalo_Camera_start(self);
-}
-method_typedef(
-    bouffalo_Camera_start,
-    "start", ""
-);
-
-void bouffalo_Camera_stopMethod(PikaObj *self, Args *args){
-    bouffalo_Camera_stop(self);
-}
-method_typedef(
-    bouffalo_Camera_stop,
-    "stop", ""
-);
-
-class_def(bouffalo_Camera){
-    __BEFORE_MOETHOD_DEF
-    method_def(bouffalo_Camera_pop_one_frame, 43554815),
-    method_def(bouffalo_Camera_start, 274811347),
-    method_def(bouffalo_Camera_get_frame_info, 420658746),
-    method_def(bouffalo_Camera___init__, 904762485),
-    method_def(bouffalo_Camera_get_frame_count, 989773559),
-    method_def(bouffalo_Camera_demo, 2090181002),
-    method_def(bouffalo_Camera_stop, 2090736459),
-};
-class_inhert(bouffalo_Camera, TinyObj);
-
-PikaObj *New_bouffalo_Camera(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, bouffalo_Camera);
-    return self;
-}
-
-Arg *bouffalo_Camera(PikaObj *self){
-    return obj_newObjInPackage(New_bouffalo_Camera);
 }
 #endif
 
@@ -6982,7 +6982,7 @@ method_typedef(
 
 void pika_lvgl_canvas_set_paletteMethod(PikaObj *self, Args *args){
     int id = args_getInt(args, "id");
-    int c = args_getInt(args, "c");
+    PikaObj* c = args_getPtr(args, "c");
     pika_lvgl_canvas_set_palette(self, id, c);
 }
 method_typedef(

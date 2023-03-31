@@ -1,4 +1,4 @@
-#include "bouffalo_Camera.h"
+#include "bflb_Camera.h"
 
 #include "bflb_i2c.h"
 #include "bflb_cam.h"
@@ -14,30 +14,30 @@ static struct bflb_cam_config_s cam_config;
 static struct image_sensor_config_s *sensor_config;
 
 void init_cam(struct bflb_device_s *gpio);
-void bouffalo_Camera___init__(PikaObj *self) {
+void bflb_Camera___init__(PikaObj *self) {
     init_cam(bflb_device_get_by_name("gpio"));
 }
 
-void bouffalo_Camera_start(PikaObj *self) {
+void bflb_Camera_start(PikaObj *self) {
     bflb_cam_start(cam0);
 }
 
-void bouffalo_Camera_stop(PikaObj *self) {
+void bflb_Camera_stop(PikaObj *self) {
     bflb_cam_stop(cam0);
 }
 
-int bouffalo_Camera_get_frame_count(PikaObj *self) {
+int bflb_Camera_get_frame_count(PikaObj *self) {
     return (int)bflb_cam_get_frame_count(cam0);
 }
 
-PikaObj* bouffalo_Camera_get_frame_info(PikaObj *self) {
+PikaObj* bflb_Camera_get_frame_info(PikaObj *self) {
     uint8_t *pic;
     uint32_t pic_size;
     pic_size = bflb_cam_get_frame_info(cam0, &pic);
     return obj_newTuple(arg_newInt((int32_t)pic), arg_newInt(pic_size));
 }
 
-void bouffalo_Camera_pop_one_frame(PikaObj *self) {
+void bflb_Camera_pop_one_frame(PikaObj *self) {
     bflb_cam_pop_one_frame(cam0);
 }
 
@@ -67,6 +67,6 @@ static lv_obj_t *canvas_cam_create(lv_obj_t *parent) {
     return canvas;
 }
 
-void bouffalo_Camera_demo(PikaObj *self) {
+void bflb_Camera_demo(PikaObj *self) {
     demo();
 }

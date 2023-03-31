@@ -1,5 +1,5 @@
-#ifndef PIKA_HAL_bouffalo_COMMON_H
-#define PIKA_HAL_bouffalo_COMMON_H
+#ifndef PIKA_HAL_bflb_COMMON_H
+#define PIKA_HAL_bflb_COMMON_H
 
 #include "../pikascript-lib/PikaStdDevice/pika_hal.h"
 

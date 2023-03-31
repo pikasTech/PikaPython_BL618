@@ -1,7 +1,7 @@
 #include "bflb_mtimer.h"
 #include "bflb_i2c.h"
 #include "board.h"
-#include "pika_hal_bouffalo_common.h"
+#include "pika_hal_bflb_common.h"
 
 typedef struct platform_data_IIC {
     struct bflb_device_s *i2c_dev;
