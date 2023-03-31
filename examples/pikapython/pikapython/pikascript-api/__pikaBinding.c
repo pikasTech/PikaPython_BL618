@@ -6969,7 +6969,7 @@ method_typedef(
 );
 
 void pika_lvgl_canvas_set_bufferMethod(PikaObj *self, Args *args){
-    uint8_t* buf = args_getBytes(args, "buf");
+    Arg* buf = args_getArg(args, "buf");
     int w = args_getInt(args, "w");
     int h = args_getInt(args, "h");
     int cf = args_getInt(args, "cf");

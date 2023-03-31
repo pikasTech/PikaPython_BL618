@@ -82,7 +82,7 @@ volatile int g_pika_app_flash_pos = 0;
 #define _PIKA_APP_FLASH_VOID 0xFF
 #define _PIKA_APP_FLASH_SAVED 0x0F
 
-static struct bflb_device_s* cam0;
+extern struct bflb_device_s* cam0;
 static struct bflb_device_s* adc;
 
 static int filesystem_init(void);
@@ -575,12 +575,12 @@ static void adc_init(void) {
 static void cam_isr(int irq, void* arg) {
     uint16_t* pic_addr;
     uint32_t pic_size;
-    // static volatile uint32_t cam_int_cnt = 0;
+    static volatile uint32_t cam_int_cnt = 0;
 
     bflb_cam_int_clear(cam0, CAM_INTCLR_NORMAL);
     pic_size = bflb_cam_get_frame_info(cam0, (void*)&pic_addr);
     bflb_cam_pop_one_frame(cam0);
-    // printf("CAM interrupt, pop picture %d: 0x%08x, len: %d\r\n",
+    // pika_debug("CAM interrupt, pop picture %d: 0x%08x, len: %d\r\n",
     // cam_int_cnt++, (uint32_t)pic_addr, pic_size);
     for (size_t i = 0; i < pic_size / sizeof(uint16_t); i++) {
         pic_addr[i] = __bswap16(pic_addr[i]);

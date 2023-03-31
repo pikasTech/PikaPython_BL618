@@ -52,12 +52,15 @@ void pika_lvgl_canvas_get_px(PikaObj* self,
 }
 
 void pika_lvgl_canvas_set_buffer(PikaObj* self,
-                                 uint8_t* buf,
+                                 Arg* buf,
                                  int w,
                                  int h,
                                  int cf) {
     lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
-    lv_canvas_set_buffer(lv_obj, buf, w, h, cf);
+    if (arg_getType(buf) == ARG_TYPE_BYTES){
+        lv_canvas_set_buffer(lv_obj, arg_getBytes(buf), w, h, cf);
+        return;
+    }
 }
 
 void pika_lvgl_canvas_set_palette(PikaObj* self, int id, PikaObj* c) {

@@ -6,16 +6,21 @@
 #include "image_sensor.h"
 #include "lvgl.h"
 #include "board.h"
+#include <stdint.h>
 
 // Global variables
 static struct bflb_device_s *i2c0;
-static struct bflb_device_s *cam0;
+struct bflb_device_s *cam0;
 static struct bflb_cam_config_s cam_config;
 static struct image_sensor_config_s *sensor_config;
+static volatile uint8_t g_cam_inited = 0;
 
 void init_cam(struct bflb_device_s *gpio);
 void bflb_Camera___init__(PikaObj *self) {
-    init_cam(bflb_device_get_by_name("gpio"));
+    if(!g_cam_inited) {
+        init_cam(bflb_device_get_by_name("gpio"));
+        g_cam_inited = 1;
+    }
 }
 
 void bflb_Camera_start(PikaObj *self) {
@@ -31,10 +36,15 @@ int bflb_Camera_get_frame_count(PikaObj *self) {
 }
 
 PikaObj* bflb_Camera_get_frame_info(PikaObj *self) {
-    uint8_t *pic;
+    uint8_t *pic_addr;
     uint32_t pic_size;
-    pic_size = bflb_cam_get_frame_info(cam0, &pic);
-    return obj_newTuple(arg_newInt((int32_t)pic), arg_newInt(pic_size));
+    pic_size = bflb_cam_get_frame_info(cam0, &pic_addr);
+    if (NULL != pic_addr){
+        for (size_t i = 0; i < pic_size / sizeof(uint16_t); i++) {
+            pic_addr[i] = __bswap16(pic_addr[i]);
+        }
+    }
+    return obj_newTuple(arg_newInt((uintptr_t)pic_addr), arg_newInt(pic_size));
 }
 
 void bflb_Camera_pop_one_frame(PikaObj *self) {
