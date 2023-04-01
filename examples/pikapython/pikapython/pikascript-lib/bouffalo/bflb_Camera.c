@@ -7,6 +7,8 @@
 #include "lvgl.h"
 #include "board.h"
 #include <stdint.h>
+#include "FreeRTOS.h"
+#include "task.h"
 
 // Global variables
 static struct bflb_device_s *i2c0;
@@ -16,6 +18,8 @@ static struct image_sensor_config_s *sensor_config;
 static volatile uint8_t g_cam_inited = 0;
 PikaEventListener* g_pika_bflb_event_listener;
 static volatile uint8_t g_cam_callback_inited = 0;
+static volatile uint8_t g_cam_callback_thread_inited = 0;
+static volatile uint8_t g_cam_callback_task_flag = 0;
 static lv_obj_t *canvas_cam;
 
 
@@ -42,8 +46,7 @@ static void cam_py_callback(void) {
         return;
     }
     pika_debug("cam_py_callback\r\n");
-    pks_eventLisener_sendSignal(g_pika_bflb_event_listener, (uintptr_t)cam0,
-                            0);
+    pks_eventListener_sendSignal(g_pika_bflb_event_listener, (uintptr_t)cam0, 0);
 }
 
 static void cam_isr(int irq, void* arg) {
@@ -53,7 +56,18 @@ static void cam_isr(int irq, void* arg) {
     // pika_debug("CAM interrupt, pop picture %d: 0x%08x, len: %d\r\n",
     // cam_int_cnt++, (uint32_t)pic_addr, pic_size);
     cam_demo_callback();
-    cam_py_callback();
+    g_cam_callback_task_flag = 1;
+    // cam_py_callback();
+}
+
+static void cam_callback_task(void *arg) {
+    while (1) {
+        if (g_cam_callback_task_flag) {
+            cam_py_callback();
+            g_cam_callback_task_flag = 0;
+        }
+        vTaskDelay(10);
+    }
 }
 
 static void cam_init(void) {
@@ -72,6 +86,13 @@ static void cam_init(void) {
         return;
     }
 
+    /* crate callbck thread */
+    if (!g_cam_callback_thread_inited) {
+        g_cam_callback_thread_inited = 1;
+        xTaskCreate(cam_callback_task, "cam_callback_task", 8192, NULL, 1,
+                    NULL);
+    }
+
     bflb_cam_int_mask(cam0, CAM_INTMASK_NORMAL, false);
     bflb_irq_attach(cam0->irq_num, cam_isr, NULL);
     bflb_irq_enable(cam0->irq_num);
@@ -84,8 +105,6 @@ static void cam_init(void) {
     cam_config.output_bufsize = sizeof(cam_buffer);
 
     bflb_cam_init(cam0, &cam_config);
-    bflb_cam_start(cam0);
-
     pika_debug("cam init ok");
     // bflb_cam_stop(cam0);
 }
@@ -120,6 +139,7 @@ void init_cam(struct bflb_device_s *gpio) {
 }
 
 void bflb_Camera___init__(PikaObj *self) {
+    pika_debug("cam init");
     if(!g_cam_inited) {
         init_cam(bflb_device_get_by_name("gpio"));
         g_cam_inited = 1;
@@ -127,10 +147,12 @@ void bflb_Camera___init__(PikaObj *self) {
 }
 
 void bflb_Camera_start(PikaObj *self) {
+    pika_debug("cam start");
     bflb_cam_start(cam0);
 }
 
 void bflb_Camera_stop(PikaObj *self) {
+    pika_debug("cam stop");
     bflb_cam_stop(cam0);
 }
 
@@ -142,11 +164,6 @@ PikaObj* bflb_Camera_get_frame_info(PikaObj *self) {
     uint8_t *pic_addr;
     uint32_t pic_size;
     pic_size = bflb_cam_get_frame_info(cam0, &pic_addr);
-    if (NULL != pic_addr){
-        for (size_t i = 0; i < pic_size / sizeof(uint16_t); i++) {
-            pic_addr[i] = __bswap16(pic_addr[i]);
-        }
-    }
     obj_setInt(self, "pic_addr", (uintptr_t)pic_addr);
     obj_setInt(self, "pic_size", pic_size);
     return obj_newTuple(arg_newInt((uintptr_t)pic_addr), arg_newInt(pic_size));
@@ -156,14 +173,17 @@ void bflb_Camera_pop_one_frame(PikaObj *self) {
     bflb_cam_pop_one_frame(cam0);
     uint16_t* pic_addr = (uint16_t*)obj_getInt(self, "pic_addr");
     uint32_t pic_size = obj_getInt(self, "pic_size");
+    pika_debug("pic_addr: %p, pic_size: %d", pic_addr, pic_size);
     for (size_t i = 0; i < pic_size / sizeof(uint16_t); i++) {
         pic_addr[i] = __bswap16(pic_addr[i]);
     }
+    pika_debug("after bswap16");
 }
 
 static lv_obj_t *canvas_cam_create(lv_obj_t *parent);
 
 void demo(void) {
+    bflb_cam_start(cam0);
     canvas_cam = canvas_cam_create(lv_scr_act());
 }
 
@@ -194,5 +214,5 @@ void bflb_Camera_set_callback(PikaObj *self, Arg* callback){
     uint32_t eventId = (uintptr_t)cam0;
     pks_eventListener_registEvent(g_pika_bflb_event_listener, eventId, self);
     g_cam_callback_inited = 1;
-    pika_debug("bflb_Camera_set_callback: %d\r\n", eventId);
+    pika_debug("bflb_Camera_set_callback: %p\r\n", eventId);
 }

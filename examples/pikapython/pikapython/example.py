@@ -1,7 +1,11 @@
 import machine
 import time
 import PikaStdDevice as std
+import bflb
+import lvgl as lv
+import PikaStdLib as std
 
+mem = std.MemChecker()
 
 def led():
     """
@@ -175,3 +179,33 @@ def uart_callback():
             break
         time.sleep(0.1)
     uart1.disable()
+
+cam0:bflb.Camera = None
+canvas:lv.canvas = None
+
+def _cam_callback(signal):
+    """
+    Camera 回调例程的回调函数
+    """
+    global cam0, canvas
+    pic_addr, pic_size = cam0.get_frame_info()
+    # print('Picture address: 0x%08x' % pic_addr)
+    # print('Picture size: %d' % pic_size)
+    cam0.pop_one_frame()
+    # canvas.set_buffer(pic_addr, 320, 240, lv.img.CF.TRUE_COLOR)
+    canvas.set_buffer(pic_addr, 320, 240, 4)
+    # mem.now()
+
+def cam():
+    global cam0, canvas
+
+    # lvgl
+    canvas = lv.canvas(lv.scr_act())
+    canvas.set_size(320, 240)
+    canvas.align(lv.ALIGN.TOP_MID, 0, 0)
+
+    # camera
+    cam0 = bflb.Camera()
+    cam0.set_callback(_cam_callback)
+    cam0.start()
+    return cam0

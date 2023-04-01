@@ -12,6 +12,7 @@ void pika_lvgl_canvas___init__(PikaObj* self, PikaObj* parent) {
     lv_obj_t* lv_parent = obj_getPtr(parent, "lv_obj");
     lv_obj_t* lv_obj = lv_canvas_create(lv_parent);
     obj_setPtr(self, "lv_obj", lv_obj);
+    pika_debug("lv_canvas_create, lv_obj: %p", lv_obj);
 }
 
 void pika_lvgl_canvas_copy_buf(PikaObj* self,
@@ -58,7 +59,13 @@ void pika_lvgl_canvas_set_buffer(PikaObj* self,
                                  int cf) {
     lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
     if (arg_getType(buf) == ARG_TYPE_BYTES){
+        pika_debug("lv_canvas_set_buffer, buf: %p", arg_getBytes(buf));
         lv_canvas_set_buffer(lv_obj, arg_getBytes(buf), w, h, cf);
+        return;
+    }
+    if (arg_getType(buf) == ARG_TYPE_INT){
+        pika_debug("lv_canvas_set_buffer, buf: %p", (void*)arg_getInt(buf));
+        lv_canvas_set_buffer(lv_obj, (void*)arg_getInt(buf), w, h, cf);
         return;
     }
 }
