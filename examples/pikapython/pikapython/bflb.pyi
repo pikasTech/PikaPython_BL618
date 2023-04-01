@@ -43,3 +43,11 @@ class Camera:
         """
         Run a demo of the camera module.
         """
+
+    def set_callback(self, callback: any):
+        """
+        Set a callback function to be called when a frame is available.
+
+        Args:
+            callback (function): The callback function to be called.
+        """

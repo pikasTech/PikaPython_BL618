@@ -22,6 +22,7 @@ void bflb_Camera_demo(PikaObj *self);
 int bflb_Camera_get_frame_count(PikaObj *self);
 PikaObj* bflb_Camera_get_frame_info(PikaObj *self);
 void bflb_Camera_pop_one_frame(PikaObj *self);
+void bflb_Camera_set_callback(PikaObj *self, Arg* callback);
 void bflb_Camera_start(PikaObj *self);
 void bflb_Camera_stop(PikaObj *self);
 

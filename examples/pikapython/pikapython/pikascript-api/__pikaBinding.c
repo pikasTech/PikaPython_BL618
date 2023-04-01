@@ -4970,6 +4970,15 @@ method_typedef(
     "pop_one_frame", ""
 );
 
+void bflb_Camera_set_callbackMethod(PikaObj *self, Args *args){
+    Arg* callback = args_getArg(args, "callback");
+    bflb_Camera_set_callback(self, callback);
+}
+method_typedef(
+    bflb_Camera_set_callback,
+    "set_callback", "callback"
+);
+
 void bflb_Camera_startMethod(PikaObj *self, Args *args){
     bflb_Camera_start(self);
 }
@@ -4989,6 +4998,7 @@ method_typedef(
 class_def(bflb_Camera){
     __BEFORE_MOETHOD_DEF
     method_def(bflb_Camera_pop_one_frame, 43554815),
+    method_def(bflb_Camera_set_callback, 244196733),
     method_def(bflb_Camera_start, 274811347),
     method_def(bflb_Camera_get_frame_info, 420658746),
     method_def(bflb_Camera___init__, 904762485),
