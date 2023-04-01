@@ -9,15 +9,15 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __bflb__H
-#define __bflb__H
+#ifndef __bflb_Microphone__H
+#define __bflb_Microphone__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_bflb(Args *args);
+PikaObj *New_bflb_Microphone(Args *args);
 
-Arg* bflb_Camera(PikaObj *self);
-Arg* bflb_Microphone(PikaObj *self);
+void bflb_Microphone___init__(PikaObj *self);
+void bflb_Microphone_demo(PikaObj *self);
 
 #endif

@@ -51,3 +51,8 @@ class Camera:
         Args:
             callback (function): The callback function to be called.
         """
+
+class Microphone:
+    def __init__(self):...
+
+    def demo(self):...

@@ -106,6 +106,8 @@
 #include "TinyObj.h"
 #include "bflb_Camera.h"
 #include "TinyObj.h"
+#include "bflb_Microphone.h"
+#include "TinyObj.h"
 #include "binascii.h"
 #include "TinyObj.h"
 #include "pika_cjson.h"
@@ -4914,9 +4916,19 @@ method_typedef(
     "Camera", ""
 );
 
+void bflb_MicrophoneMethod(PikaObj *self, Args *args){
+    Arg* res = bflb_Microphone(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    bflb_Microphone,
+    "Microphone", ""
+);
+
 class_def(bflb){
     __BEFORE_MOETHOD_DEF
     constructor_def(bflb_Camera, 725709262),
+    constructor_def(bflb_Microphone, 1675396345),
 };
 class_inhert(bflb, TinyObj);
 
@@ -5016,6 +5028,41 @@ PikaObj *New_bflb_Camera(Args *args){
 
 Arg *bflb_Camera(PikaObj *self){
     return obj_newObjInPackage(New_bflb_Camera);
+}
+#endif
+
+#ifndef PIKA_MODULE_BFLB_DISABLE
+void bflb_Microphone___init__Method(PikaObj *self, Args *args){
+    bflb_Microphone___init__(self);
+}
+method_typedef(
+    bflb_Microphone___init__,
+    "__init__", ""
+);
+
+void bflb_Microphone_demoMethod(PikaObj *self, Args *args){
+    bflb_Microphone_demo(self);
+}
+method_typedef(
+    bflb_Microphone_demo,
+    "demo", ""
+);
+
+class_def(bflb_Microphone){
+    __BEFORE_MOETHOD_DEF
+    method_def(bflb_Microphone___init__, 904762485),
+    method_def(bflb_Microphone_demo, 2090181002),
+};
+class_inhert(bflb_Microphone, TinyObj);
+
+PikaObj *New_bflb_Microphone(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, bflb_Microphone);
+    return self;
+}
+
+Arg *bflb_Microphone(PikaObj *self){
+    return obj_newObjInPackage(New_bflb_Microphone);
 }
 #endif
 

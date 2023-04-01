@@ -15,7 +15,7 @@
 #define USBD_LANGID_STRING 1033
 
 #define USB_CDC_BUFFER_SIZE_RX (1024 * 8)
-#define USB_CDC_BUFFER_SIZE_TX 128
+#define USB_CDC_BUFFER_SIZE_TX (1024)
 
 /*!< config descriptor size */
 #define USB_CONFIG_SIZE (9 + CDC_ACM_DESCRIPTOR_LEN)
