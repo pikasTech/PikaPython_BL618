@@ -1,4 +1,5 @@
 // C标准库
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -18,6 +19,7 @@
 #include "board.h"
 #include "csi_rv32_gcc.h"
 #include "image_sensor.h"
+#include "touch.h"
 
 // USB驱动
 #include "usbd_cdc_user.h"
@@ -214,7 +216,24 @@ static void init_lvgl(void) {
     lv_log_register_print_cb(lv_log_print_g_cb);
     lv_init();
     lv_port_disp_init();
-    lv_port_indev_init();
+    /* check touch is connected */
+    uint8_t point_num = 0;
+
+    touch_coord_t touch_max_point = {
+        .coord_x = LCD_W,
+        .coord_y = LCD_H,
+    };
+    touch_init(&touch_max_point);
+
+    touch_coord_t touch_coord;
+    uint64_t start_time = bflb_mtimer_get_time_ms();
+    int ret = touch_read(&point_num, &touch_coord, 1);
+    uint64_t end_time = bflb_mtimer_get_time_ms();
+    printf("touch_read ret:%d\r\n", ret);
+    printf("touch_read time:%d\r\n", end_time - start_time);
+    if(ret == 0){
+        lv_port_indev_init();
+    }
 
     LOG_I("lvgl success\r\n");
 }
@@ -222,11 +241,6 @@ static void init_lvgl(void) {
 static void create_tasks(void) {
 #if PIKA_FREERTOS_ENABLE
     xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
-#if USING_USB_CDC
-    // while (!g_usb_cdc_init) {
-    //     vTaskDelay(10);
-    // }
-#endif
 #if USING_KEY_ERAISE
     xTaskCreate(_erase_app_task, (char *)"erase_app_task", 8192, NULL,
                 configMAX_PRIORITIES - 1, NULL);

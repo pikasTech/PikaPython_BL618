@@ -49,7 +49,7 @@ PikaObj *pikaScriptInit(void){
             "import binascii\n"
             "import modbus\n"
             "import time\n"
-            "import pika_lvgl\n"
+            "import lvgl\n"
             "import _thread\n"
             "import machine\n"
             "import example\n"
