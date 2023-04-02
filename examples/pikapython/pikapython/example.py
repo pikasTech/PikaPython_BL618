@@ -134,8 +134,9 @@ def uart():
     uart1.enable()
     print('Waiting for data from uart1')
     for i in range(10):
-        uart1.write('Hello World! (%d/%d)' % (i+1, 10))
+        uart1.write('Hello!')
         data = uart1.read(256)
+        time.sleep(0.1)
         if data:
             print('Received: %r' % data)
         time.sleep(0.1)

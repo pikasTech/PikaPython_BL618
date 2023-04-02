@@ -74,6 +74,7 @@ struct bflb_device_s* uartx = NULL;
 
 volatile FILE g_pika_app_flash_file = {0};
 volatile int g_pika_app_flash_pos = 0;
+static volatile int g_usb_cdc_init = 0;
 #define _PIKA_APP_FLASH_ADDR 0x100000   // 1M
 #define _PIKA_APP_FLASH_SIZE 24 * 1024  // 24K
 
@@ -123,7 +124,7 @@ static void consumer_task(void* pvParameters) {
     cdc_acm_init();
 #endif
     vTaskDelay(1000);
-
+    g_usb_cdc_init = 1;
     // init_cam(bflb_device_get_by_name("gpio"));
 
 #if USING_KEY_ERAISE
@@ -207,30 +208,29 @@ static void init_gpio(struct bflb_device_s **gpio) {
 }
 
 static void init_lvgl(void) {
-#if USING_LVGL
     /* lvgl init */
+    struct bflb_device_s *gpio;
+    init_gpio(&gpio);
     lv_log_register_print_cb(lv_log_print_g_cb);
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
 
     LOG_I("lvgl success\r\n");
-#endif
-}
-
-static void init_uart(void) {
-#if !USING_USB_CDC
-    uartx = bflb_device_get_by_name("uart0");
-#endif
 }
 
 static void create_tasks(void) {
 #if PIKA_FREERTOS_ENABLE
+    xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
+#if USING_USB_CDC
+    // while (!g_usb_cdc_init) {
+    //     vTaskDelay(10);
+    // }
+#endif
 #if USING_KEY_ERAISE
     xTaskCreate(_erase_app_task, (char *)"erase_app_task", 8192, NULL,
                 configMAX_PRIORITIES - 1, NULL);
 #endif
-    xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
 #if USING_USB_CDC
     xTaskCreate(usb_cdc_fflush_task, (char *)"usb_cdc_fflush_task", 1024, NULL,
                 1, NULL);
@@ -248,12 +248,9 @@ int main(void) {
 
     init_filesystem();
 
-    struct bflb_device_s *gpio;
-    init_gpio(&gpio);
-
+#if USING_LVGL
     init_lvgl();
-
-    init_uart();
+#endif
 
     create_tasks();
 
