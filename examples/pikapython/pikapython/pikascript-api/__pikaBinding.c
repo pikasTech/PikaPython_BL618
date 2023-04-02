@@ -174,6 +174,8 @@
 #include "TinyObj.h"
 #include "pika_lvgl_chart.h"
 #include "pika_lvgl_lv_obj.h"
+#include "pika_lvgl_chart_series_t.h"
+#include "TinyObj.h"
 #include "pika_lvgl_checkbox.h"
 #include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_dropdown.h"
@@ -6072,6 +6074,15 @@ method_typedef(
     "chart", ""
 );
 
+void pika_lvgl_chart_series_tMethod(PikaObj *self, Args *args){
+    Arg* res = pika_lvgl_chart_series_t(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    pika_lvgl_chart_series_t,
+    "chart_series_t", ""
+);
+
 void pika_lvgl_checkboxMethod(PikaObj *self, Args *args){
     Arg* res = pika_lvgl_checkbox(self);
     method_returnArg(args, res);
@@ -6345,6 +6356,7 @@ class_def(pika_lvgl){
     constructor_def(pika_lvgl_style_t, 797563209),
     method_def(pika_lvgl___init__, 904762485),
     constructor_def(pika_lvgl_point_t, 1003563106),
+    constructor_def(pika_lvgl_chart_series_t, 1160577140),
     constructor_def(pika_lvgl_TEXT_DECOR, 1241293750),
     constructor_def(pika_lvgl_LAYOUT_FLEX, 1259909937),
     method_def(pika_lvgl_timer_create_basic, 1321143834),
@@ -7189,11 +7201,40 @@ method_typedef(
 void pika_lvgl_chart_add_seriesMethod(PikaObj *self, Args *args){
     PikaObj* color = args_getPtr(args, "color");
     int axis = args_getInt(args, "axis");
-    pika_lvgl_chart_add_series(self, color, axis);
+    PikaObj* res = pika_lvgl_chart_add_series(self, color, axis);
+    method_returnObj(args, res);
 }
 method_typedef(
     pika_lvgl_chart_add_series,
     "add_series", "color,axis"
+);
+
+void pika_lvgl_chart_get_series_nextMethod(PikaObj *self, Args *args){
+    PikaObj* ser = args_getPtr(args, "ser");
+    PikaObj* res = pika_lvgl_chart_get_series_next(self, ser);
+    method_returnObj(args, res);
+}
+method_typedef(
+    pika_lvgl_chart_get_series_next,
+    "get_series_next", "ser"
+);
+
+void pika_lvgl_chart_refreshMethod(PikaObj *self, Args *args){
+    pika_lvgl_chart_refresh(self);
+}
+method_typedef(
+    pika_lvgl_chart_refresh,
+    "refresh", ""
+);
+
+void pika_lvgl_chart_set_ext_y_arrayMethod(PikaObj *self, Args *args){
+    PikaObj* ser = args_getPtr(args, "ser");
+    Arg* array = args_getArg(args, "array");
+    pika_lvgl_chart_set_ext_y_array(self, ser, array);
+}
+method_typedef(
+    pika_lvgl_chart_set_ext_y_array,
+    "set_ext_y_array", "ser,array"
 );
 
 void pika_lvgl_chart_set_point_countMethod(PikaObj *self, Args *args){
@@ -7236,9 +7277,12 @@ method_typedef(
 
 class_def(pika_lvgl_chart){
     __BEFORE_MOETHOD_DEF
+    method_def(pika_lvgl_chart_get_series_next, 96779661),
     method_def(pika_lvgl_chart_set_point_count, 514208098),
     method_def(pika_lvgl_chart_add_series, 746843960),
+    method_def(pika_lvgl_chart_set_ext_y_array, 843544855),
     method_def(pika_lvgl_chart___init__, 904762485),
+    method_def(pika_lvgl_chart_refresh, 1044231764),
     method_def(pika_lvgl_chart_set_zoom_x, 1055088428),
     method_def(pika_lvgl_chart_set_zoom_y, 1055088429),
     method_def(pika_lvgl_chart_set_range, 1128260061),
@@ -7253,6 +7297,23 @@ PikaObj *New_pika_lvgl_chart(Args *args){
 
 Arg *pika_lvgl_chart(PikaObj *self){
     return obj_newObjInPackage(New_pika_lvgl_chart);
+}
+#endif
+
+#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
+class_def(pika_lvgl_chart_series_t){
+    __BEFORE_MOETHOD_DEF
+};
+class_inhert(pika_lvgl_chart_series_t, TinyObj);
+
+PikaObj *New_pika_lvgl_chart_series_t(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, pika_lvgl_chart_series_t);
+    return self;
+}
+
+Arg *pika_lvgl_chart_series_t(PikaObj *self){
+    return obj_newObjInPackage(New_pika_lvgl_chart_series_t);
 }
 #endif
 
@@ -8344,6 +8405,16 @@ method_typedef(
     "set_size", "w,h"
 );
 
+void pika_lvgl_lv_obj_set_style_sizeMethod(PikaObj *self, Args *args){
+    int value = args_getInt(args, "value");
+    int selector = args_getInt(args, "selector");
+    pika_lvgl_lv_obj_set_style_size(self, value, selector);
+}
+method_typedef(
+    pika_lvgl_lv_obj_set_style_size,
+    "set_style_size", "value,selector"
+);
+
 void pika_lvgl_lv_obj_set_widthMethod(PikaObj *self, Args *args){
     int w = args_getInt(args, "w");
     pika_lvgl_lv_obj_set_width(self, w);
@@ -8428,6 +8499,7 @@ class_def(pika_lvgl_lv_obj){
     method_def(pika_lvgl_lv_obj_move_to, 1439197854),
     method_def(pika_lvgl_lv_obj_add_state, 1454808302),
     method_def(pika_lvgl_lv_obj_add_style, 1454834174),
+    method_def(pika_lvgl_lv_obj_set_style_size, 1456395227),
     method_def(pika_lvgl_lv_obj_is_visible, 1459230894),
     method_def(pika_lvgl_lv_obj_clear_flag, 1542104037),
     method_def(pika_lvgl_lv_obj_get_self_width, 1660554189),

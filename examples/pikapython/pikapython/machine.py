@@ -23,10 +23,8 @@ class Led(GPIO):
     def __init__(self, id: int):
         super().__init__()
         if id == 0:
-            self.pin = 'P27'
+            self.pin = 'P21'
         elif id == 1:
-            self.pin = 'P28'
-        elif id == 2:
             self.pin = 'P32'
         self.setMode('out')
         self.enable()

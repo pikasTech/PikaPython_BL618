@@ -18,7 +18,10 @@
 PikaObj *New_pika_lvgl_chart(Args *args);
 
 void pika_lvgl_chart___init__(PikaObj *self, PikaObj* parent);
-void pika_lvgl_chart_add_series(PikaObj *self, PikaObj* color, int axis);
+PikaObj* pika_lvgl_chart_add_series(PikaObj *self, PikaObj* color, int axis);
+PikaObj* pika_lvgl_chart_get_series_next(PikaObj *self, PikaObj* ser);
+void pika_lvgl_chart_refresh(PikaObj *self);
+void pika_lvgl_chart_set_ext_y_array(PikaObj *self, PikaObj* ser, Arg* array);
 void pika_lvgl_chart_set_point_count(PikaObj *self, int cnt);
 void pika_lvgl_chart_set_range(PikaObj *self, int axis, int min, int max);
 void pika_lvgl_chart_set_zoom_x(PikaObj *self, int zoom_x);

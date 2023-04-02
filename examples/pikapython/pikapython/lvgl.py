@@ -42,4 +42,5 @@ canvas = pika_lvgl.canvas
 scr_act = pika_lvgl.scr_act
 pct = pika_lvgl.pct
 timer_create_basic = pika_lvgl.timer_create_basic
+chart = pika_lvgl.chart
 

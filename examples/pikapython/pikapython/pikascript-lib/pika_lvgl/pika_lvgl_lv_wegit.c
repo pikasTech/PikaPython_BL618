@@ -24,6 +24,7 @@
 #include "pika_lvgl_table.h"
 #include "pika_lvgl_textarea.h"
 #include "pika_lvgl_chart.h"
+#include "pika_lvgl_chart_series_t.h"
 
 void pika_lvgl_arc___init__(PikaObj* self, PikaObj* parent) {
     lv_obj_t* lv_parent = obj_getPtr(parent, "lv_obj");
@@ -501,10 +502,37 @@ void pika_lvgl_chart___init__(PikaObj *self, PikaObj* parent){
     obj_setPtr(self, "lv_obj", lv_obj); 
 }
 
-void pika_lvgl_chart_add_series(PikaObj *self, PikaObj* color, int axis){
+PikaObj* pika_lvgl_chart_add_series(PikaObj *self, PikaObj* color, int axis){
     lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
     lv_color_t* lv_color = obj_getPtr(color, "lv_color");
-    lv_chart_add_series(lv_obj, *lv_color, axis);
+    lv_chart_series_t* ser = lv_chart_add_series(lv_obj, *lv_color, axis);
+    PikaObj* new_obj = newNormalObj(New_pika_lvgl_chart_series_t);
+    obj_setPtr(new_obj, "series", ser);
+    return new_obj;
+}
+
+PikaObj* pika_lvgl_chart_get_series_next(PikaObj *self, PikaObj* ser){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_series_t* series = obj_getPtr(ser, "lv_chart_series_t");
+    lv_chart_series_t* next = lv_chart_get_series_next(lv_obj, series);
+    PikaObj* new_obj = newNormalObj(New_pika_lvgl_chart_series_t);
+    obj_setPtr(new_obj, "series", next);
+    return new_obj;
+}
+
+void pika_lvgl_chart_set_ext_y_array(PikaObj *self, PikaObj* ser, Arg* array){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_series_t* series = obj_getPtr(ser, "series");
+    if (arg_getType(array) == ARG_TYPE_INT){
+        lv_coord_t* arr = (lv_coord_t*)arg_getInt(array);
+        lv_chart_set_ext_y_array(lv_obj, series, arr);
+        pika_debug("set ext y array, arr: %p", arr);
+    }
+}
+
+void pika_lvgl_chart_refresh(PikaObj *self){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_refresh(lv_obj);
 }
 
 void pika_lvgl_chart_set_point_count(PikaObj *self, int cnt){
@@ -526,5 +554,6 @@ void pika_lvgl_chart_set_zoom_y(PikaObj *self, int zoom_y){
     lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
     lv_chart_set_zoom_y(lv_obj, zoom_y);
 }
+
 
 #endif

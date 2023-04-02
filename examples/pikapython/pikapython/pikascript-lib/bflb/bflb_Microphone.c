@@ -162,16 +162,15 @@ static lv_obj_t* chart_mic_create(lv_obj_t* parent) {
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 2000);
     /*Do not display points on the data*/
     lv_obj_set_style_size(chart, 0, LV_PART_INDICATOR);
+    pika_debug("LV_PART_INDICATOR: %d", LV_PART_INDICATOR);
 
     lv_chart_series_t* ser = lv_chart_add_series(
         chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
-    LV_ASSERT(ser == lv_chart_get_series_next(chart, NULL));
-    pika_assert(ser == lv_chart_get_series_next(chart, NULL));
 
+    pika_debug("LV_CHART_AXIS_PRIMARY_Y: %d", LV_CHART_AXIS_PRIMARY_Y);
     uint32_t pcnt = sizeof(ecg_sample) / sizeof(ecg_sample[0]);
     lv_chart_set_point_count(chart, pcnt);
-    lv_chart_set_ext_y_array(chart, lv_chart_get_series_next(chart, NULL),
-                             (lv_coord_t*)ecg_sample);
+    lv_chart_set_ext_y_array(chart, ser, (lv_coord_t*)ecg_sample);
 
     lv_chart_set_zoom_x(chart, LV_IMG_ZOOM_NONE);
     lv_chart_set_zoom_y(chart, LV_IMG_ZOOM_NONE);
