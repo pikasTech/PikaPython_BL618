@@ -14,6 +14,7 @@ extern volatile uint8_t g_callback_thread_inited;
 
 static lv_obj_t* chart_mic = NULL;
 static lv_coord_t ecg_sample[160];
+int16_t g_mic_frame[TEST_COUNT];
 static struct bflb_device_s* adc;
 static uint32_t adc_raw_data[2][TEST_ADC_CHANNELS * TEST_COUNT];
 
@@ -106,7 +107,7 @@ void mic_demo_update(int16_t *data, uint16_t len)
 {
     uint32_t pcnt = sizeof(ecg_sample) / sizeof(ecg_sample[0]);
     if (!chart_mic || !data || !len) {
-        pika_debug("mic_demo_update skiped\r\n");
+        pika_debug("mic_demo_update skiped");
         return;
     }
     if (len > pcnt)
@@ -132,7 +133,6 @@ static void dma0_ch0_isr(void* arg) {
     bflb_adc_parse_result(adc, adc_raw_data[!(dma_tc_flag0 & 0x1)], result,
                           TEST_ADC_CHANNELS * TEST_COUNT);
 
-    int16_t results_temp[TEST_COUNT];
     uint32_t btn_adc_val_avg = 0;
     for (size_t j = 0, k = 0; j < TEST_ADC_CHANNELS * TEST_COUNT; j++) {
         // printf("raw data:%08x\r\n", adc_raw_data[!(dma_tc_flag0 & 0x1)][j]);
@@ -142,13 +142,13 @@ static void dma0_ch0_isr(void* arg) {
         if (ADC_CHANNEL_3 == result[j].pos_chan) {
             btn_adc_val_avg += result[j].millivolt;
         } else if (ADC_CHANNEL_0 == result[j].pos_chan) {
-            results_temp[k++] = result[j].millivolt;  // - 952;
+            g_mic_frame[k++] = result[j].millivolt;  // - 952;
         }
     }
     btn_adc_val_avg /= TEST_COUNT;
 
     g_mic_callback_task_flag = 1;
-    mic_demo_update(results_temp, TEST_COUNT);
+    mic_demo_update(g_mic_frame, TEST_COUNT);
     // label_adc_btn_update(btn_adc_val_avg);
 }
 
@@ -220,4 +220,8 @@ void mic_py_callback(void) {
     }
     pika_debug("mic_py_callback\r\n");
     pks_eventListener_sendSignal(g_pika_bflb_event_listener, (uintptr_t)adc, 0);
+}
+
+PikaObj* bflb_Microphone_get_frame_info(PikaObj *self){
+    return obj_newTuple(arg_newInt((uintptr_t)g_mic_frame), arg_newInt(sizeof(g_mic_frame) / sizeof(g_mic_frame[0])));
 }

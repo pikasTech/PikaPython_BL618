@@ -53,12 +53,41 @@ class Camera:
         """
 
 class Microphone:
-    def __init__(self):...
+    """Microphone class for controlling and accessing the BLMCU microphone module."""
 
-    def start(self):...
+    def __init__(self):
+        """
+        Initialize the Microphone object, set up the necessary configurations,
+        and prepare the microphone module for operation.
+        """
 
-    def stop(self):...
+    def start(self):
+        """
+        Start the microphone module for capturing audio data.
+        """
 
-    def set_callback(self, callback: any):...
+    def stop(self):
+        """
+        Stop the microphone module from capturing audio data.
+        """
 
-    def demo(self):...
+    def set_callback(self, callback: any):
+        """
+        Set a callback function to be called when audio data is available.
+
+        Args:
+            callback (function): The callback function to be called.
+        """
+
+    def demo(self):
+        """
+        Run a demo of the microphone module.
+        """
+
+    def get_frame_info(self) -> tuple:
+        """
+        Get information about the next available audio frame.
+
+        Returns:
+            tuple: A tuple containing the frame's address (int) and size (int) in bytes.
+        """

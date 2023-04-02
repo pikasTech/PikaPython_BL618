@@ -5048,6 +5048,15 @@ method_typedef(
     "demo", ""
 );
 
+void bflb_Microphone_get_frame_infoMethod(PikaObj *self, Args *args){
+    PikaObj* res = bflb_Microphone_get_frame_info(self);
+    method_returnObj(args, res);
+}
+method_typedef(
+    bflb_Microphone_get_frame_info,
+    "get_frame_info", ""
+);
+
 void bflb_Microphone_set_callbackMethod(PikaObj *self, Args *args){
     Arg* callback = args_getArg(args, "callback");
     bflb_Microphone_set_callback(self, callback);
@@ -5077,6 +5086,7 @@ class_def(bflb_Microphone){
     __BEFORE_MOETHOD_DEF
     method_def(bflb_Microphone_set_callback, 244196733),
     method_def(bflb_Microphone_start, 274811347),
+    method_def(bflb_Microphone_get_frame_info, 420658746),
     method_def(bflb_Microphone___init__, 904762485),
     method_def(bflb_Microphone_demo, 2090181002),
     method_def(bflb_Microphone_stop, 2090736459),

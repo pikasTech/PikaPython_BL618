@@ -210,10 +210,14 @@ def cam():
     cam0.start()
     return cam0
 
+mic0:bflb.Microphone = None
+
 def _mic_callback(signal):
     print('Mic data received')
+    mic0.get_frame_info()
 
 def mic():
+    global mic0
     mic0 = bflb.Microphone()
     mic0.set_callback(_mic_callback)
     mic0.start()
