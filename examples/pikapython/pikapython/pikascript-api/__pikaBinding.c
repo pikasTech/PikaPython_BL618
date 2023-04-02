@@ -5048,10 +5048,38 @@ method_typedef(
     "demo", ""
 );
 
+void bflb_Microphone_set_callbackMethod(PikaObj *self, Args *args){
+    Arg* callback = args_getArg(args, "callback");
+    bflb_Microphone_set_callback(self, callback);
+}
+method_typedef(
+    bflb_Microphone_set_callback,
+    "set_callback", "callback"
+);
+
+void bflb_Microphone_startMethod(PikaObj *self, Args *args){
+    bflb_Microphone_start(self);
+}
+method_typedef(
+    bflb_Microphone_start,
+    "start", ""
+);
+
+void bflb_Microphone_stopMethod(PikaObj *self, Args *args){
+    bflb_Microphone_stop(self);
+}
+method_typedef(
+    bflb_Microphone_stop,
+    "stop", ""
+);
+
 class_def(bflb_Microphone){
     __BEFORE_MOETHOD_DEF
+    method_def(bflb_Microphone_set_callback, 244196733),
+    method_def(bflb_Microphone_start, 274811347),
     method_def(bflb_Microphone___init__, 904762485),
     method_def(bflb_Microphone_demo, 2090181002),
+    method_def(bflb_Microphone_stop, 2090736459),
 };
 class_inhert(bflb_Microphone, TinyObj);
 

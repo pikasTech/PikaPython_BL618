@@ -209,3 +209,12 @@ def cam():
     cam0.set_callback(_cam_callback)
     cam0.start()
     return cam0
+
+def _mic_callback(signal):
+    print('Mic data received')
+
+def mic():
+    mic0 = bflb.Microphone()
+    mic0.set_callback(_mic_callback)
+    mic0.start()
+    return mic0

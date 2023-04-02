@@ -3,9 +3,14 @@
 #include "bflb_gpio.h"
 #include "lvgl.h"
 #include "bflb_Microphone.h"
+#include "bflb_common.h"
 
 #define TEST_ADC_CHANNELS 2
 #define TEST_COUNT 80
+
+extern PikaEventListener* g_pika_bflb_event_listener;
+extern uint8_t g_mic_callback_task_flag;
+extern volatile uint8_t g_callback_thread_inited;
 
 static lv_obj_t* chart_mic = NULL;
 static lv_coord_t ecg_sample[160];
@@ -17,6 +22,7 @@ static void adc_init(void);
 static void dma0_ch0_isr(void* arg);
 
 static uint8_t g_mic_inited = 0;
+static uint8_t g_mic_callback_inited = 0;
 
 static void microphone_init(void) {
     adc_init();
@@ -93,13 +99,14 @@ static void adc_init(void) {
     // bflb_adc_start_conversion(adc);
 
     bflb_adc_stop_conversion(adc);
+    _callback_thread_init();
 }
 
-void chart_mic_append_data(int16_t *data, uint16_t len)
+void mic_demo_update(int16_t *data, uint16_t len)
 {
     uint32_t pcnt = sizeof(ecg_sample) / sizeof(ecg_sample[0]);
     if (!chart_mic || !data || !len) {
-        pika_debug("chart_mic_append_data error\r\n");
+        pika_debug("mic_demo_update skiped\r\n");
         return;
     }
     if (len > pcnt)
@@ -112,7 +119,7 @@ void chart_mic_append_data(int16_t *data, uint16_t len)
     memcpy(ecg_sample + pcnt - len, data, len * sizeof(lv_coord_t));
 
     lv_chart_set_point_count(chart, pcnt);
-    // pika_debug("chart_mic_append_data len:%d", len);
+    // pika_debug("mic_demo_update len:%d", len);
 }
 
 
@@ -140,7 +147,8 @@ static void dma0_ch0_isr(void* arg) {
     }
     btn_adc_val_avg /= TEST_COUNT;
 
-    chart_mic_append_data(results_temp, TEST_COUNT);
+    g_mic_callback_task_flag = 1;
+    mic_demo_update(results_temp, TEST_COUNT);
     // label_adc_btn_update(btn_adc_val_avg);
 }
 
@@ -184,4 +192,32 @@ void bflb_Microphone___init__(PikaObj *self){
 void bflb_Microphone_demo(PikaObj *self){
     pika_debug("microphone demo");
     microphone_demo();
+}
+
+void bflb_Microphone_set_callback(PikaObj *self, Arg* callback){
+    obj_setArg(self, "eventCallBack", callback);
+    /* init event_listener for the first time */
+    if (NULL == g_pika_bflb_event_listener) {
+        pks_eventListener_init(&g_pika_bflb_event_listener);
+    }
+    uint32_t eventId = (uintptr_t)adc;
+    pks_eventListener_registEvent(g_pika_bflb_event_listener, eventId, self);
+    g_mic_callback_inited = 1;
+    pika_debug("bflb_Microphone_set_callback: %p\r\n", eventId);
+}
+
+void bflb_Microphone_start(PikaObj *self){
+    bflb_adc_start_conversion(adc);
+}
+
+void bflb_Microphone_stop(PikaObj *self){
+    bflb_adc_stop_conversion(adc);
+}
+
+void mic_py_callback(void) {
+    if (!g_mic_callback_inited) {
+        return;
+    }
+    pika_debug("mic_py_callback\r\n");
+    pks_eventListener_sendSignal(g_pika_bflb_event_listener, (uintptr_t)adc, 0);
 }

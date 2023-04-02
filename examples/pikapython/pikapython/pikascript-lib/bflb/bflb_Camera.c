@@ -1,4 +1,5 @@
 #include "bflb_Camera.h"
+#include "bflb_common.h"
 
 #include "bflb_i2c.h"
 #include "bflb_cam.h"
@@ -16,12 +17,12 @@ struct bflb_device_s *cam0;
 static struct bflb_cam_config_s cam_config;
 static struct image_sensor_config_s *sensor_config;
 static volatile uint8_t g_cam_inited = 0;
-PikaEventListener* g_pika_bflb_event_listener;
 static volatile uint8_t g_cam_callback_inited = 0;
-static volatile uint8_t g_cam_callback_thread_inited = 0;
-static volatile uint8_t g_cam_callback_task_flag = 0;
 static lv_obj_t *canvas_cam;
 
+extern PikaEventListener* g_pika_bflb_event_listener;
+extern volatile uint8_t g_callback_thread_inited;
+extern volatile uint8_t g_cam_callback_task_flag;
 
 void canvas_cam_demo_update(void *pic_addr);
 
@@ -41,7 +42,7 @@ static void cam_demo_callback(void) {
     canvas_cam_demo_update(pic_addr);
 }
 
-static void cam_py_callback(void) {
+void cam_py_callback(void) {
     if (!g_cam_callback_inited) {
         return;
     }
@@ -60,16 +61,6 @@ static void cam_isr(int irq, void* arg) {
     // cam_py_callback();
 }
 
-static void cam_callback_task(void *arg) {
-    while (1) {
-        if (g_cam_callback_task_flag) {
-            cam_py_callback();
-            g_cam_callback_task_flag = 0;
-        }
-        vTaskDelay(10);
-    }
-}
-
 static void cam_init(void) {
     struct bflb_cam_config_s cam_config;
     struct image_sensor_config_s* sensor_config;
@@ -86,12 +77,7 @@ static void cam_init(void) {
         return;
     }
 
-    /* crate callbck thread */
-    if (!g_cam_callback_thread_inited) {
-        g_cam_callback_thread_inited = 1;
-        xTaskCreate(cam_callback_task, "cam_callback_task", 8192, NULL, 1,
-                    NULL);
-    }
+    _callback_thread_init();
 
     bflb_cam_int_mask(cam0, CAM_INTMASK_NORMAL, false);
     bflb_irq_attach(cam0->irq_num, cam_isr, NULL);

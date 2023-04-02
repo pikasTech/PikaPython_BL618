@@ -19,5 +19,8 @@ PikaObj *New_bflb_Microphone(Args *args);
 
 void bflb_Microphone___init__(PikaObj *self);
 void bflb_Microphone_demo(PikaObj *self);
+void bflb_Microphone_set_callback(PikaObj *self, Arg* callback);
+void bflb_Microphone_start(PikaObj *self);
+void bflb_Microphone_stop(PikaObj *self);
 
 #endif
