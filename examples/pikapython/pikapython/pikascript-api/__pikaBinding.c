@@ -172,6 +172,8 @@
 #include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_cf_t.h"
 #include "TinyObj.h"
+#include "pika_lvgl_chart.h"
+#include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_checkbox.h"
 #include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_dropdown.h"
@@ -6061,6 +6063,15 @@ method_typedef(
     "cf_t", ""
 );
 
+void pika_lvgl_chartMethod(PikaObj *self, Args *args){
+    Arg* res = pika_lvgl_chart(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    pika_lvgl_chart,
+    "chart", ""
+);
+
 void pika_lvgl_checkboxMethod(PikaObj *self, Args *args){
     Arg* res = pika_lvgl_checkbox(self);
     method_returnArg(args, res);
@@ -6317,6 +6328,7 @@ class_def(pika_lvgl){
     constructor_def(pika_lvgl_ALIGN, 214050224),
     constructor_def(pika_lvgl_EVENT, 219149159),
     constructor_def(pika_lvgl_STATE, 235676006),
+    constructor_def(pika_lvgl_chart, 255405367),
     constructor_def(pika_lvgl_label, 265827749),
     constructor_def(pika_lvgl_table, 275315341),
     constructor_def(pika_lvgl_checkbox, 296102156),
@@ -7161,6 +7173,86 @@ PikaObj *New_pika_lvgl_cf_t(Args *args){
 
 Arg *pika_lvgl_cf_t(PikaObj *self){
     return obj_newObjInPackage(New_pika_lvgl_cf_t);
+}
+#endif
+
+#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
+void pika_lvgl_chart___init__Method(PikaObj *self, Args *args){
+    PikaObj* parent = args_getPtr(args, "parent");
+    pika_lvgl_chart___init__(self, parent);
+}
+method_typedef(
+    pika_lvgl_chart___init__,
+    "__init__", "parent"
+);
+
+void pika_lvgl_chart_add_seriesMethod(PikaObj *self, Args *args){
+    PikaObj* color = args_getPtr(args, "color");
+    int axis = args_getInt(args, "axis");
+    pika_lvgl_chart_add_series(self, color, axis);
+}
+method_typedef(
+    pika_lvgl_chart_add_series,
+    "add_series", "color,axis"
+);
+
+void pika_lvgl_chart_set_point_countMethod(PikaObj *self, Args *args){
+    int cnt = args_getInt(args, "cnt");
+    pika_lvgl_chart_set_point_count(self, cnt);
+}
+method_typedef(
+    pika_lvgl_chart_set_point_count,
+    "set_point_count", "cnt"
+);
+
+void pika_lvgl_chart_set_rangeMethod(PikaObj *self, Args *args){
+    int axis = args_getInt(args, "axis");
+    int min = args_getInt(args, "min");
+    int max = args_getInt(args, "max");
+    pika_lvgl_chart_set_range(self, axis, min, max);
+}
+method_typedef(
+    pika_lvgl_chart_set_range,
+    "set_range", "axis,min,max"
+);
+
+void pika_lvgl_chart_set_zoom_xMethod(PikaObj *self, Args *args){
+    int zoom_x = args_getInt(args, "zoom_x");
+    pika_lvgl_chart_set_zoom_x(self, zoom_x);
+}
+method_typedef(
+    pika_lvgl_chart_set_zoom_x,
+    "set_zoom_x", "zoom_x"
+);
+
+void pika_lvgl_chart_set_zoom_yMethod(PikaObj *self, Args *args){
+    int zoom_y = args_getInt(args, "zoom_y");
+    pika_lvgl_chart_set_zoom_y(self, zoom_y);
+}
+method_typedef(
+    pika_lvgl_chart_set_zoom_y,
+    "set_zoom_y", "zoom_y"
+);
+
+class_def(pika_lvgl_chart){
+    __BEFORE_MOETHOD_DEF
+    method_def(pika_lvgl_chart_set_point_count, 514208098),
+    method_def(pika_lvgl_chart_add_series, 746843960),
+    method_def(pika_lvgl_chart___init__, 904762485),
+    method_def(pika_lvgl_chart_set_zoom_x, 1055088428),
+    method_def(pika_lvgl_chart_set_zoom_y, 1055088429),
+    method_def(pika_lvgl_chart_set_range, 1128260061),
+};
+class_inhert(pika_lvgl_chart, pika_lvgl_lv_obj);
+
+PikaObj *New_pika_lvgl_chart(Args *args){
+    PikaObj *self = New_pika_lvgl_lv_obj(args);
+    obj_setClass(self, pika_lvgl_chart);
+    return self;
+}
+
+Arg *pika_lvgl_chart(PikaObj *self){
+    return obj_newObjInPackage(New_pika_lvgl_chart);
 }
 #endif
 

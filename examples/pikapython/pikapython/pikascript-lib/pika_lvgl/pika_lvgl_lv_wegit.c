@@ -23,6 +23,7 @@
 #include "pika_lvgl_switch.h"
 #include "pika_lvgl_table.h"
 #include "pika_lvgl_textarea.h"
+#include "pika_lvgl_chart.h"
 
 void pika_lvgl_arc___init__(PikaObj* self, PikaObj* parent) {
     lv_obj_t* lv_parent = obj_getPtr(parent, "lv_obj");
@@ -493,6 +494,37 @@ PikaObj* pika_lvgl_img_get_src(PikaObj* self) {
 void pika_lvgl_img_set_zoom(PikaObj* self, int zoom) {
     lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
     lv_img_set_zoom(lv_obj, zoom);
+}
+
+void pika_lvgl_chart___init__(PikaObj *self, PikaObj* parent){
+    lv_obj_t* lv_obj = lv_chart_create(obj_getPtr(parent, "lv_obj"));
+    obj_setPtr(self, "lv_obj", lv_obj); 
+}
+
+void pika_lvgl_chart_add_series(PikaObj *self, PikaObj* color, int axis){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_color_t* lv_color = obj_getPtr(color, "lv_color");
+    lv_chart_add_series(lv_obj, *lv_color, axis);
+}
+
+void pika_lvgl_chart_set_point_count(PikaObj *self, int cnt){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_set_point_count(lv_obj, cnt);
+}
+
+void pika_lvgl_chart_set_range(PikaObj *self, int axis, int min, int max){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_set_range(lv_obj, axis, min, max);
+}
+
+void pika_lvgl_chart_set_zoom_x(PikaObj *self, int zoom_x){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_set_zoom_x(lv_obj, zoom_x);
+}
+
+void pika_lvgl_chart_set_zoom_y(PikaObj *self, int zoom_y){
+    lv_obj_t* lv_obj = obj_getPtr(self, "lv_obj");
+    lv_chart_set_zoom_y(lv_obj, zoom_y);
 }
 
 #endif
