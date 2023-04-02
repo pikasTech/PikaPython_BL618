@@ -99,6 +99,7 @@ void chart_mic_append_data(int16_t *data, uint16_t len)
 {
     uint32_t pcnt = sizeof(ecg_sample) / sizeof(ecg_sample[0]);
     if (!chart_mic || !data || !len) {
+        pika_debug("chart_mic_append_data error\r\n");
         return;
     }
     if (len > pcnt)
@@ -111,11 +112,12 @@ void chart_mic_append_data(int16_t *data, uint16_t len)
     memcpy(ecg_sample + pcnt - len, data, len * sizeof(lv_coord_t));
 
     lv_chart_set_point_count(chart, pcnt);
+    // pika_debug("chart_mic_append_data len:%d", len);
 }
 
 
 static void dma0_ch0_isr(void* arg) {
-    pika_debug("dma0_ch0_isr");
+    // pika_debug("dma0_ch0_isr");
     static uint32_t dma_tc_flag0 = 0;
     dma_tc_flag0++;
     // printf("[%d]tc done\r\n", dma_tc_flag0);
@@ -147,8 +149,8 @@ static lv_obj_t* chart_mic_create(lv_obj_t* parent) {
     lv_obj_t* chart;
     chart = lv_chart_create(parent);
     pika_debug("create chart: %p", chart);
-    lv_obj_set_size(chart, 320, 80);
-    lv_obj_align(chart, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_set_size(chart, 320, 240);
+    // lv_obj_align(chart, LV_ALIGN_CENTER, 0, 0);
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 2000);
     /*Do not display points on the data*/
     lv_obj_set_style_size(chart, 0, LV_PART_INDICATOR);
