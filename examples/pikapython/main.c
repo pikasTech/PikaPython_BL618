@@ -216,7 +216,6 @@ static void init_lvgl(void) {
     lv_log_register_print_cb(lv_log_print_g_cb);
     lv_init();
     lv_port_disp_init();
-    /* check touch is connected */
     uint8_t point_num = 0;
 
     touch_coord_t touch_max_point = {
@@ -226,11 +225,9 @@ static void init_lvgl(void) {
     touch_init(&touch_max_point);
 
     touch_coord_t touch_coord;
-    uint64_t start_time = bflb_mtimer_get_time_ms();
     int ret = touch_read(&point_num, &touch_coord, 1);
-    uint64_t end_time = bflb_mtimer_get_time_ms();
     printf("touch_read ret:%d\r\n", ret);
-    printf("touch_read time:%d\r\n", end_time - start_time);
+    /* check touch is connected */
     if(ret == 0){
         lv_port_indev_init();
     }
