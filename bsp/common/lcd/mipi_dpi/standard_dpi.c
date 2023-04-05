@@ -26,7 +26,6 @@
 #if defined(LCD_DPI_STANDARD)
 
 #include "standard_dpi.h"
-#include "bl_mipi_dpi_pec.h"
 
 /* mipi dpi (RGB) paramant */
 static lcd_mipi_dpi_init_t dpi_para = {

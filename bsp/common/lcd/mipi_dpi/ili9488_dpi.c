@@ -28,7 +28,6 @@
 #include "bflb_mtimer.h"
 #include "bflb_gpio.h"
 #include "ili9488_dpi.h"
-#include "bl_mipi_dpi_pec.h"
 
 #if (ILI9488_DPI_INIT_INTERFACE == 2)
 

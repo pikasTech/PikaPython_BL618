@@ -24,9 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #ifndef __DATA_QUEUE_OBJ__H
 #define __DATA_QUEUE_OBJ__H
 #include "PikaObj.h"
@@ -47,7 +45,4 @@ PikaObj* queueObj_popObj(QueueObj* self);
 
 PikaObj* queueObj_getCurrentObj(QueueObj* self);
 
-#endif
-#ifdef __cplusplus
-}
 #endif

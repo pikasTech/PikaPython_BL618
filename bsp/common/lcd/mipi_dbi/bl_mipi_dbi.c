@@ -137,7 +137,7 @@ int lcd_dbi_init(lcd_dbi_init_t *dbi_parra)
         dbi_cfg.pixel_output_format = DBI_PIXEL_OUTPUT_FORMAT_RGB_565;
     } else if (dbi_parra->pixel_format == LCD_DBI_LCD_PIXEL_FORMAT_NRGB8888) {
         dbi_cfg.pixel_input_format = DBI_PIXEL_INPUT_FORMAT_NRGB_8888;
-        dbi_cfg.pixel_output_format = DBI_PIXEL_INPUT_FORMAT_NRGB_8888;
+        dbi_cfg.pixel_output_format = DBI_PIXEL_OUTPUT_FORMAT_RGB_888;
     }
 
     /* gpio init */
@@ -297,7 +297,6 @@ int lcd_dbi_transmit_cmd_pixel_fill_async(uint8_t cmd, uint32_t pixel_val, size_
 }
 
 #else
-#error "Devices that do not support PEC-DBI! Replace the driver port (lcd_conf.h)"
 #endif
 
 #endif

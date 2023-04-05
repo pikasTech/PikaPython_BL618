@@ -25,7 +25,6 @@
  * SOFTWARE.
  */
 
-
 #include "__instruction_def.h"
 
 //! just append ins to the end, insert ins would brake the pre-compiled

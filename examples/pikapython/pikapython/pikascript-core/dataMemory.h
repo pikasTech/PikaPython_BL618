@@ -24,9 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
@@ -68,7 +66,7 @@ struct Pool{
 };
 /* clang-format on */
 
-#define align_by(size, aline) \
+#define aline_by(size, aline) \
     (((size) == 0) ? 0 : (((size)-1) / (aline) + 1) * (aline))
 
 void pikaFree(void* mem, uint32_t size);
@@ -89,7 +87,4 @@ void mem_pool_init(void);
 #define mem_align(_size) ((((_size) + 4 - 1) & ~(4 - 1)))
 
 #undef __DATA_MEMORY_CLASS_IMPLEMENT__
-#endif
-#ifdef __cplusplus
-}
 #endif

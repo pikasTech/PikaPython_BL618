@@ -2549,10 +2549,6 @@ static void _OPT_EQU(OperatorInfo* op) {
         is_equ = (arg_getPtr(op->a1) == arg_getPtr(op->a2));
         goto exit;
     }
-    if (argType_isObject(op->t1) && argType_isObject(op->t2)) {
-        is_equ = (arg_getPtr(op->a1) == arg_getPtr(op->a2));
-        goto exit;
-    }
     /* default: int bool, and float */
     is_equ = ((op->f1 - op->f2) * (op->f1 - op->f2) < (pika_float)0.000001);
     goto exit;
@@ -3437,7 +3433,7 @@ static VMParameters* _pikaVM_runPyLines(PikaObj* self, char* py_lines) {
     /* load or generate byte code frame */
     /* generate byte code */
     byteCodeFrame_init(bytecode_frame_p);
-    if (PIKA_RES_OK != pika_lines2Bytes(bytecode_frame_p, py_lines)) {
+    if (PIKA_RES_OK != Parser_linesToBytes(bytecode_frame_p, py_lines)) {
         pika_platform_printf("Error: Syntax error.\r\n");
         globals = NULL;
         goto exit;

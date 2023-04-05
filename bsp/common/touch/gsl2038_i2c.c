@@ -5156,8 +5156,8 @@ static int gsl2038_i2c_read_byte(uint16_t register_addr, uint8_t *data_buf, uint
     msg[1].flags = I2C_M_READ;
     msg[1].buffer = data_buf;
     msg[1].length = len;
-    return bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
-    // return 0;
+    bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
+    return 0;
 }
 
 static int gsl2038_i2c_write_byte(uint16_t register_addr, uint8_t *data_buf, uint16_t len)
@@ -5207,10 +5207,6 @@ static void gsl2038_startchip()
 
 int gsl2038_i2c_init(touch_coord_t *max_value)
 {
-    if (touch_gsl2038_i2c) {
-        /* already init */
-        return 0;
-    }
     gsl2038_i2c_peripheral_init();
 
     gsl2038_reset();

@@ -52,29 +52,6 @@ lcd_dbi_init_t dbi_para = {
 };
 
 #elif (LCD_DBI_INTERFACE_TYPE == 2)
-/* pec sumi dbi 8080 x8 */
-#include "bl_mipi_dbi_typeb_pec.h"
-
-#define lcd_dbi_init                          pec_dbi_b_init
-#define lcd_dbi_isbusy                        pec_dbi_b_dma_is_busy
-
-#define lcd_dbi_transmit_cmd_para             pec_dbi_b_transmit_cmd_para
-#define lcd_dbi_transmit_cmd_pixel_sync       pec_dbi_b_transmit_cmd_pixel_sync
-#define lcd_dbi_transmit_cmd_pixel_fill_sync  pec_dbi_b_transmit_cmd_pixel_fill_sync
-
-#define lcd_dbi_sync_callback_enable          pec_dbi_b_async_callback_enable
-#define lcd_dbi_async_callback_register       pec_dbi_b_async_callback_register
-#define lcd_dbi_transmit_cmd_pixel_async      pec_dbi_b_transmit_cmd_pixel_async
-#define lcd_dbi_transmit_cmd_pixel_fill_async pec_dbi_b_transmit_cmd_pixel_fill_async
-
-lcd_mipi_dbi_init_t dbi_para = {
-    .clock_freq = 20 * 1000 * 1000,
-#if (ILI9488_DBI_PIXEL_FORMAT == 1)
-    .pixel_format = LCD_DBI_LCD_PIXEL_FORMAT_RGB565,
-#elif (ILI9488_DBI_PIXEL_FORMAT == 2)
-    .pixel_format = LCD_DBI_LCD_PIXEL_FORMAT_NRGB8888,
-#endif
-};
 
 #else
 

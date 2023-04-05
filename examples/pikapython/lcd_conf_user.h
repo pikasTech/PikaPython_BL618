@@ -1,5 +1,3 @@
-#ifndef _LCD_CONF_USER_H_
-#define _LCD_CONF_USER_H_
 
 /* clang-format off */
 
@@ -22,14 +20,13 @@
     LCD_SPI_ST7796
     LCD_SPI_ST7789V
 */
-#define LCD_SPI_ST7796
+#define LCD_DBI_ILI9488
 
 /* dbi ili9488 config */
 #if defined LCD_DBI_ILI9488
 
     /* Selecting interface type, more configuration of peripherals comes later
         1: DBI peripheral, supported functions: typeC-3wire, typeC-4wire, typeB-x8(8080); (support chips: bl616, bl606p, bl808),
-        2: PEC simulation, supported functions: typeB-x8; (support chips: bl616),
     */
     #define LCD_DBI_INTERFACE_TYPE 1
 
@@ -59,6 +56,40 @@
     */
    #define ILI9488_DBI_COLOR_REVERSAL 0
 
+/* dbi ili9341 config */
+#elif defined LCD_DBI_ILI9341
+
+    /* Selecting interface type, more configuration of peripherals comes later
+        1: DBI peripheral, supported functions: typeC-3wire, typeC-4wire, typeB-x8(8080); (support chips: bl616, bl606p, bl808),
+    */
+    #define LCD_DBI_INTERFACE_TYPE 1
+
+    /* enable the lcd reset function
+        0: Does not care about lcd hard reset
+        1: use gpio to reset the lcd
+    */
+    #define LCD_RESET_EN 1
+
+    /* Selecting pixel format
+        1: rgb565 (16-bit, output rgb565)
+        2: nrgb8888 (32-bit, output rgb888)
+    */
+    #define ILI9341_DBI_PIXEL_FORMAT 1
+
+    /* ILI9341 LCD width and height */
+    #define ILI9341_DBI_W 240
+    #define ILI9341_DBI_H 320
+
+    /* The offset of the area can be displayed */
+    #define ILI9341_DBI_OFFSET_X 0
+    #define ILI9341_DBI_OFFSET_Y 0
+
+    /* Color reversal, Some screens are required
+        0: disable
+        1: enable
+    */
+   #define ILI9341_DBI_COLOR_REVERSAL 0
+
 #endif
 
 /* dpi gc9503v config */
@@ -66,9 +97,8 @@
 
     /* Selecting DPI working mode
         1: DPI peripheral (support: bl808)
-        2: PEC simulation (support: bl616, bl628)
     */
-    #define GC9503V_DPI_MODE 2
+    #define GC9503V_DPI_MODE 1
 
     /* Selecting initialization interface
         1: Software spi 9-bit mode
@@ -89,7 +119,6 @@
 
     /* Selecting pixel format
         1: rgb565 (16-bits)
-        2: nrgb8888 (32-bits, Do not support PEC simulation)
     */
     #define GC9503V_DPI_PIXEL_FORMAT 1
 
@@ -102,9 +131,8 @@
 
     /* Selecting DPI working mode
         1: DPI peripheral (support: bl808)
-        2: PEC simulation (support: bl616, bl628)
     */
-    #define ILI9488_DPI_MODE 2
+    #define ILI9488_DPI_MODE 1
 
     /* Selecting initialization interface
         1: Hardware spi 8-bit mode
@@ -125,7 +153,6 @@
 
     /* Selecting pixel format
         1: rgb565 (16-bits)
-        2: nrgb8888 (32-bits, Do not support PEC simulation)
     */
     #define ILI9488_DPI_PIXEL_FORMAT 1
 
@@ -138,9 +165,8 @@
 
     /* Selecting DPI working mode
         1: DPI peripheral (support: bl808)
-        2: PEC simulation (support: bl616, bl628)
     */
-    #define STANDARD_DPI_MODE 2
+    #define STANDARD_DPI_MODE 1
 
     /* enable the lcd reset function
         0: Does not care about lcd hard reset
@@ -150,7 +176,6 @@
 
     /* Selecting pixel format
         1: rgb565 (16-bits)
-        2: nrgb8888 (32-bits, Do not support PEC simulation)
     */
     #define STANDARD_DPI_PIXEL_FORMAT 1
 
@@ -307,58 +332,9 @@
         0: disable
         1: enable
     */
-   #define ST7796_SPI_COLOR_REVERSAL 1
+   #define ST7796_SPI_COLOR_REVERSAL 0
 
 #endif
-
-
-/********** PEC simulation DPI configuration **********/
-#if ((defined ILI9488_DPI_MODE) && (ILI9488_DPI_MODE == 2)) || \
-    ((defined GC9503V_DPI_MODE) && (GC9503V_DPI_MODE == 2)) || \
-    ((defined STANDARD_DPI_MODE) && (STANDARD_DPI_MODE == 2))
-
-    /* supports 16-wire and 8-wire-latch output modes */
-
-    /* For internal use, do not modify */
-    #define LCD_PEC_SIMU_DPI_ENABLE
-
-    /* dma used by pec */
-    #define LCD_PEC_DPI_DMA_NAME "dma0_ch3"
-
-    /* The mode of data latch.
-        0: 16-bit *1-cycle date out;
-        1: 8-bit *2-cycle date out, Low 8-bit latch, high 8-bit pass-through, Additional latch devices are required */
-    #define LCD_PEC_DPI_DATA_LATCH_MODE 1
-
-    /* enable the lcd reset function
-        0: Does not care about lcd hard reset
-        1: use gpio to reset the lcd
-    */
-    #define LCD_RESET_EN 1
-
-    /* Signal polarity selection */
-    #define LCD_PEC_DPI_V_SYNC_SIN_POL 0
-    #define LCD_PEC_DPI_H_SYNC_SIN_POL 0
-    #define LCD_PEC_DPI_DE_SIN_POL     1
-
-    /* Selecting pin
-        The numbers of some pins must be consecutive, and cannot cross the 32 boundary.
-        Rules: PIN_DE = PIN_CLK + 1; PIN_LATCH = PIN_CLK + 2;
-               PIN_VSYNC = PIN_HSYNC + 1;
-               PIN_DATA_n = PIN_DATA_START + n;
-    */
-    #define LCD_DPI_PEC_SIMU_PIN_CLK         GPIO_PIN_32
-    #define LCD_DPI_PEC_SIMU_PIN_HSYNC       GPIO_PIN_18
-    #define LCD_DPI_PEC_SIMU_PIN_DATA_START  GPIO_PIN_24 /* 8-wire(latch mode) or 16-wire */
-
-    /* Maximum number of DPI invalid rows, >= (VHW + VBP + VFP) */
-    #define LCD_DPI_PEC_INVALID_LIN_MAX 300
-
-    /* cache num of dma_lli, >= 2,
-        Performance is best when the value is no less than the number of disp_buffs used */
-    #define LCD_DPI_PEC_DMA_LLI_CACHE_NUM 3
-#endif
-
 
 /********** DBI peripheral configuration ***********/
 #if (defined(LCD_DBI_INTERFACE_TYPE) && (LCD_DBI_INTERFACE_TYPE == 1))
@@ -417,25 +393,6 @@
 
 #endif
 
-
-/********** PEC simulation DBI configuration ***********/
-#if (defined(LCD_DBI_INTERFACE_TYPE) && (LCD_DBI_INTERFACE_TYPE == 2))
-
-    /* pec simulation mipi-dbi-typeB config, only 8-wire is supported, the read operation is not supported */
-
-    /* dma used by pec */
-    #define LCD_PEC_DBI_B_DMA_NAME "dma0_ch3"
-
-    /* The maximum amount of data to be transferred affects the number of LLI memory pools */
-    #define DBI_PEC_DBI_DATA_SIZE_MAX (800 * 640 * 4)
-
-    /* Selecting pin */
-    #define LCD_DBI_PEC_SIMU_PIN_DC   GPIO_PIN_23
-    #define LCD_DBI_PEC_SIMU_PIN_WR   GPIO_PIN_34
-    #define LCD_DBI_PEC_SIMU_PIN_DATA GPIO_PIN_24 /* The lowest line of an 8-bit data line */
-
-#endif
-
 /********** SPI hard 4-wire configuration ***********/
 #if (defined(LCD_SPI_INTERFACE_TYPE) && (LCD_SPI_INTERFACE_TYPE == 1))
 
@@ -449,11 +406,11 @@
     #define LCD_SPI_HARD_4_PIXEL_CNT_MAX (800 * 640)
 
     /* spi pin, hardware controlled */
-    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_9
-    #define LCD_SPI_HARD_4_PIN_DAT   GPIO_PIN_19
+    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_13
+    #define LCD_SPI_HARD_4_PIN_DAT   GPIO_PIN_15
     /* cs/dc pin, software controlled */
-    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_17
-    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_18
+    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_14
+    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_16
 
 #endif
 
@@ -461,7 +418,7 @@
 #if (defined(LCD_RESET_EN) && LCD_RESET_EN)
 
 /* lcd reset signal pin, please leave blank if not needed */
-#define LCD_RESET_PIN GPIO_PIN_2
+#define LCD_RESET_PIN GPIO_PIN_12
 
 /* lcd reset signal active level
     0: lcd reset at low level
@@ -474,9 +431,5 @@
 
 /* lcd recovery time after reset end (ms) */
 #define LCD_RESET_DELAY   100
-
-#endif
-
-/* clang-format on */
 
 #endif

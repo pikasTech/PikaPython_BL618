@@ -26,9 +26,6 @@
  * SOFTWARE.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifndef __PIKA_OOC_H__
 #define __PIKA_OOC_H__
@@ -41,8 +38,4 @@ extern "C" {
 /* plooc_class.h should support reentrant */
 #if PIKA_PLOOC_ENABLE
     #include "../pikascript-lib/PLOOC/plooc_class.h"
-#endif
-
-#ifdef __cplusplus
-}
 #endif

@@ -35,8 +35,7 @@ MEMORY
     itcm_memory (rx)  : ORIGIN = 0x62FC0000, LENGTH = 20K
     dtcm_memory (rx)  : ORIGIN = 0x62FC5000, LENGTH = 4K
     nocache_ram_memory (!rx) : ORIGIN = 0x22FC6000, LENGTH = 44K+60K
-    /* ram_memory  (!rx) : ORIGIN = 0x62FE0000, LENGTH = 320K-20K-4K-44K-60K */
-    ram_memory  (!rx) : ORIGIN = 0x62FE0000, LENGTH = 320K-20K-4K
+    ram_memory  (!rx) : ORIGIN = 0x62FE0000, LENGTH = 320K-20K-4K-44K-60K
     ram_wifi  (wxa)   : ORIGIN = 0x23010000, LENGTH = 160K - __EM_SIZE
 }
 
@@ -275,6 +274,7 @@ SECTIONS
         /*__end__ = .;*/
         /*end = __end__;*/
         KEEP(*(.psram_data*))
+        KEEP(*(.psram_noinit*))
         KEEP(*(.img_buf*))
 
         . = ALIGN(4);
@@ -316,6 +316,7 @@ SECTIONS
 
     PROVIDE( _heap_wifi_start = . );
     PROVIDE( _heap_wifi_size = ORIGIN(ram_wifi) + LENGTH(ram_wifi) - _heap_wifi_start );
+    PROVIDE(__LD_CONFIG_EM_SEL = __EM_SIZE);
 
 }
 

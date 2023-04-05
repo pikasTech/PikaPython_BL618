@@ -25,7 +25,6 @@
 #include "_modbus.h"
 #include "_thread.h"
 #include "_time.h"
-#include "bflb.h"
 #include "binascii.h"
 #include "pika_cjson.h"
 #include "pika_lvgl.h"
@@ -102,12 +101,6 @@
 #include "TinyObj.h"
 #include "_time.h"
 #include "TinyObj.h"
-#include "bflb.h"
-#include "TinyObj.h"
-#include "bflb_Camera.h"
-#include "TinyObj.h"
-#include "bflb_Microphone.h"
-#include "TinyObj.h"
 #include "binascii.h"
 #include "TinyObj.h"
 #include "pika_cjson.h"
@@ -137,6 +130,8 @@
 #include "pika_cjson_True_.h"
 #include "pika_cjson_cJSON.h"
 #include "pika_cjson_cJSON.h"
+#include "TinyObj.h"
+#include "pika_libc.h"
 #include "TinyObj.h"
 #include "pika_lvgl.h"
 #include "TinyObj.h"
@@ -168,14 +163,6 @@
 #include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_btn.h"
 #include "pika_lvgl_lv_obj.h"
-#include "pika_lvgl_canvas.h"
-#include "pika_lvgl_lv_obj.h"
-#include "pika_lvgl_cf_t.h"
-#include "TinyObj.h"
-#include "pika_lvgl_chart.h"
-#include "pika_lvgl_lv_obj.h"
-#include "pika_lvgl_chart_series_t.h"
-#include "TinyObj.h"
 #include "pika_lvgl_checkbox.h"
 #include "pika_lvgl_lv_obj.h"
 #include "pika_lvgl_dropdown.h"
@@ -296,7 +283,6 @@ PikaObj *New_PikaMain(Args *args){
     obj_newObj(self, "_modbus", "_modbus", New__modbus);
     obj_newObj(self, "_thread", "_thread", New__thread);
     obj_newObj(self, "_time", "_time", New__time);
-    obj_newObj(self, "bflb", "bflb", New_bflb);
     obj_newObj(self, "binascii", "binascii", New_binascii);
     obj_newObj(self, "pika_cjson", "pika_cjson", New_pika_cjson);
     obj_newObj(self, "pika_lvgl", "pika_lvgl", New_pika_lvgl);
@@ -4057,13 +4043,12 @@ method_typedef(
 
 void PikaStdLib_SysObj_intMethod(PikaObj *self, Args *args){
     Arg* arg = args_getArg(args, "arg");
-    PikaTuple* base = args_getTuple(args, "base");
-    int res = PikaStdLib_SysObj_int(self, arg, base);
+    int res = PikaStdLib_SysObj_int(self, arg);
     method_returnInt(args, res);
 }
 method_typedef(
     PikaStdLib_SysObj_int,
-    "int", "arg,*base"
+    "int", "arg"
 );
 
 void PikaStdLib_SysObj_iterMethod(PikaObj *self, Args *args){
@@ -4910,204 +4895,6 @@ PikaObj *New__time(Args *args){
 }
 #endif
 
-#ifndef PIKA_MODULE_BFLB_DISABLE
-void bflb_CameraMethod(PikaObj *self, Args *args){
-    Arg* res = bflb_Camera(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    bflb_Camera,
-    "Camera", ""
-);
-
-void bflb_MicrophoneMethod(PikaObj *self, Args *args){
-    Arg* res = bflb_Microphone(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    bflb_Microphone,
-    "Microphone", ""
-);
-
-class_def(bflb){
-    __BEFORE_MOETHOD_DEF
-    constructor_def(bflb_Camera, 725709262),
-    constructor_def(bflb_Microphone, 1675396345),
-};
-class_inhert(bflb, TinyObj);
-
-PikaObj *New_bflb(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, bflb);
-    return self;
-}
-#endif
-
-#ifndef PIKA_MODULE_BFLB_DISABLE
-void bflb_Camera___init__Method(PikaObj *self, Args *args){
-    bflb_Camera___init__(self);
-}
-method_typedef(
-    bflb_Camera___init__,
-    "__init__", ""
-);
-
-void bflb_Camera_demoMethod(PikaObj *self, Args *args){
-    bflb_Camera_demo(self);
-}
-method_typedef(
-    bflb_Camera_demo,
-    "demo", ""
-);
-
-void bflb_Camera_get_frame_countMethod(PikaObj *self, Args *args){
-    int res = bflb_Camera_get_frame_count(self);
-    method_returnInt(args, res);
-}
-method_typedef(
-    bflb_Camera_get_frame_count,
-    "get_frame_count", ""
-);
-
-void bflb_Camera_get_frame_infoMethod(PikaObj *self, Args *args){
-    PikaObj* res = bflb_Camera_get_frame_info(self);
-    method_returnObj(args, res);
-}
-method_typedef(
-    bflb_Camera_get_frame_info,
-    "get_frame_info", ""
-);
-
-void bflb_Camera_pop_one_frameMethod(PikaObj *self, Args *args){
-    bflb_Camera_pop_one_frame(self);
-}
-method_typedef(
-    bflb_Camera_pop_one_frame,
-    "pop_one_frame", ""
-);
-
-void bflb_Camera_set_callbackMethod(PikaObj *self, Args *args){
-    Arg* callback = args_getArg(args, "callback");
-    bflb_Camera_set_callback(self, callback);
-}
-method_typedef(
-    bflb_Camera_set_callback,
-    "set_callback", "callback"
-);
-
-void bflb_Camera_startMethod(PikaObj *self, Args *args){
-    bflb_Camera_start(self);
-}
-method_typedef(
-    bflb_Camera_start,
-    "start", ""
-);
-
-void bflb_Camera_stopMethod(PikaObj *self, Args *args){
-    bflb_Camera_stop(self);
-}
-method_typedef(
-    bflb_Camera_stop,
-    "stop", ""
-);
-
-class_def(bflb_Camera){
-    __BEFORE_MOETHOD_DEF
-    method_def(bflb_Camera_pop_one_frame, 43554815),
-    method_def(bflb_Camera_set_callback, 244196733),
-    method_def(bflb_Camera_start, 274811347),
-    method_def(bflb_Camera_get_frame_info, 420658746),
-    method_def(bflb_Camera___init__, 904762485),
-    method_def(bflb_Camera_get_frame_count, 989773559),
-    method_def(bflb_Camera_demo, 2090181002),
-    method_def(bflb_Camera_stop, 2090736459),
-};
-class_inhert(bflb_Camera, TinyObj);
-
-PikaObj *New_bflb_Camera(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, bflb_Camera);
-    return self;
-}
-
-Arg *bflb_Camera(PikaObj *self){
-    return obj_newObjInPackage(New_bflb_Camera);
-}
-#endif
-
-#ifndef PIKA_MODULE_BFLB_DISABLE
-void bflb_Microphone___init__Method(PikaObj *self, Args *args){
-    bflb_Microphone___init__(self);
-}
-method_typedef(
-    bflb_Microphone___init__,
-    "__init__", ""
-);
-
-void bflb_Microphone_demoMethod(PikaObj *self, Args *args){
-    bflb_Microphone_demo(self);
-}
-method_typedef(
-    bflb_Microphone_demo,
-    "demo", ""
-);
-
-void bflb_Microphone_get_frame_infoMethod(PikaObj *self, Args *args){
-    PikaObj* res = bflb_Microphone_get_frame_info(self);
-    method_returnObj(args, res);
-}
-method_typedef(
-    bflb_Microphone_get_frame_info,
-    "get_frame_info", ""
-);
-
-void bflb_Microphone_set_callbackMethod(PikaObj *self, Args *args){
-    Arg* callback = args_getArg(args, "callback");
-    bflb_Microphone_set_callback(self, callback);
-}
-method_typedef(
-    bflb_Microphone_set_callback,
-    "set_callback", "callback"
-);
-
-void bflb_Microphone_startMethod(PikaObj *self, Args *args){
-    bflb_Microphone_start(self);
-}
-method_typedef(
-    bflb_Microphone_start,
-    "start", ""
-);
-
-void bflb_Microphone_stopMethod(PikaObj *self, Args *args){
-    bflb_Microphone_stop(self);
-}
-method_typedef(
-    bflb_Microphone_stop,
-    "stop", ""
-);
-
-class_def(bflb_Microphone){
-    __BEFORE_MOETHOD_DEF
-    method_def(bflb_Microphone_set_callback, 244196733),
-    method_def(bflb_Microphone_start, 274811347),
-    method_def(bflb_Microphone_get_frame_info, 420658746),
-    method_def(bflb_Microphone___init__, 904762485),
-    method_def(bflb_Microphone_demo, 2090181002),
-    method_def(bflb_Microphone_stop, 2090736459),
-};
-class_inhert(bflb_Microphone, TinyObj);
-
-PikaObj *New_bflb_Microphone(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, bflb_Microphone);
-    return self;
-}
-
-Arg *bflb_Microphone(PikaObj *self){
-    return obj_newObjInPackage(New_bflb_Microphone);
-}
-#endif
-
 #ifndef PIKA_MODULE_BINASCII_DISABLE
 void binascii_a2b_hexMethod(PikaObj *self, Args *args){
     char* val = args_getStr(args, "val");
@@ -5904,6 +5691,19 @@ Arg *pika_cjson_cJSON(PikaObj *self){
 }
 #endif
 
+#ifndef PIKA_MODULE_PIKA_LIBC_DISABLE
+class_def(pika_libc){
+    __BEFORE_MOETHOD_DEF
+};
+class_inhert(pika_libc, TinyObj);
+
+PikaObj *New_pika_libc(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, pika_libc);
+    return self;
+}
+#endif
+
 #ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
 void pika_lvgl_ALIGNMethod(PikaObj *self, Args *args){
     Arg* res = pika_lvgl_ALIGN(self);
@@ -6045,42 +5845,6 @@ void pika_lvgl_btnMethod(PikaObj *self, Args *args){
 method_typedef(
     pika_lvgl_btn,
     "btn", ""
-);
-
-void pika_lvgl_canvasMethod(PikaObj *self, Args *args){
-    Arg* res = pika_lvgl_canvas(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    pika_lvgl_canvas,
-    "canvas", ""
-);
-
-void pika_lvgl_cf_tMethod(PikaObj *self, Args *args){
-    Arg* res = pika_lvgl_cf_t(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    pika_lvgl_cf_t,
-    "cf_t", ""
-);
-
-void pika_lvgl_chartMethod(PikaObj *self, Args *args){
-    Arg* res = pika_lvgl_chart(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    pika_lvgl_chart,
-    "chart", ""
-);
-
-void pika_lvgl_chart_series_tMethod(PikaObj *self, Args *args){
-    Arg* res = pika_lvgl_chart_series_t(self);
-    method_returnArg(args, res);
-}
-method_typedef(
-    pika_lvgl_chart_series_t,
-    "chart_series_t", ""
 );
 
 void pika_lvgl_checkboxMethod(PikaObj *self, Args *args){
@@ -6339,7 +6103,6 @@ class_def(pika_lvgl){
     constructor_def(pika_lvgl_ALIGN, 214050224),
     constructor_def(pika_lvgl_EVENT, 219149159),
     constructor_def(pika_lvgl_STATE, 235676006),
-    constructor_def(pika_lvgl_chart, 255405367),
     constructor_def(pika_lvgl_label, 265827749),
     constructor_def(pika_lvgl_table, 275315341),
     constructor_def(pika_lvgl_checkbox, 296102156),
@@ -6356,18 +6119,15 @@ class_def(pika_lvgl){
     constructor_def(pika_lvgl_style_t, 797563209),
     method_def(pika_lvgl___init__, 904762485),
     constructor_def(pika_lvgl_point_t, 1003563106),
-    constructor_def(pika_lvgl_chart_series_t, 1160577140),
     constructor_def(pika_lvgl_TEXT_DECOR, 1241293750),
     constructor_def(pika_lvgl_LAYOUT_FLEX, 1259909937),
     method_def(pika_lvgl_timer_create_basic, 1321143834),
     method_def(pika_lvgl_palette_main, 1452255384),
     constructor_def(pika_lvgl_FLEX_ALIGN, 1805883102),
-    constructor_def(pika_lvgl_canvas, 1978095745),
     method_def(pika_lvgl_lv_color_hex, 2036570665),
     method_def(pika_lvgl___del__, 2038499702),
     constructor_def(pika_lvgl_ANIM, 2088896938),
     constructor_def(pika_lvgl_SIZE, 2089538912),
-    constructor_def(pika_lvgl_cf_t, 2090145697),
     constructor_def(pika_lvgl_flag_t, 2108063474),
     method_def(pika_lvgl_indev_get_act, 2120537489),
 };
@@ -7030,290 +6790,6 @@ PikaObj *New_pika_lvgl_btn(Args *args){
 
 Arg *pika_lvgl_btn(PikaObj *self){
     return obj_newObjInPackage(New_pika_lvgl_btn);
-}
-#endif
-
-#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
-void pika_lvgl_canvas___init__Method(PikaObj *self, Args *args){
-    PikaObj* parent = args_getPtr(args, "parent");
-    pika_lvgl_canvas___init__(self, parent);
-}
-method_typedef(
-    pika_lvgl_canvas___init__,
-    "__init__", "parent"
-);
-
-void pika_lvgl_canvas_copy_bufMethod(PikaObj *self, Args *args){
-    uint8_t* to_copy = args_getBytes(args, "to_copy");
-    int x = args_getInt(args, "x");
-    int y = args_getInt(args, "y");
-    int w = args_getInt(args, "w");
-    int h = args_getInt(args, "h");
-    pika_lvgl_canvas_copy_buf(self, to_copy, x, y, w, h);
-}
-method_typedef(
-    pika_lvgl_canvas_copy_buf,
-    "copy_buf", "to_copy,x,y,w,h"
-);
-
-void pika_lvgl_canvas_fill_bgMethod(PikaObj *self, Args *args){
-    PikaObj* color = args_getPtr(args, "color");
-    int opa = args_getInt(args, "opa");
-    pika_lvgl_canvas_fill_bg(self, color, opa);
-}
-method_typedef(
-    pika_lvgl_canvas_fill_bg,
-    "fill_bg", "color,opa"
-);
-
-void pika_lvgl_canvas_get_imgMethod(PikaObj *self, Args *args){
-    PikaObj* res = pika_lvgl_canvas_get_img(self);
-    method_returnObj(args, res);
-}
-method_typedef(
-    pika_lvgl_canvas_get_img,
-    "get_img", ""
-);
-
-void pika_lvgl_canvas_get_pxMethod(PikaObj *self, Args *args){
-    int x = args_getInt(args, "x");
-    int y = args_getInt(args, "y");
-    PikaObj* color = args_getPtr(args, "color");
-    int opa = args_getInt(args, "opa");
-    pika_lvgl_canvas_get_px(self, x, y, color, opa);
-}
-method_typedef(
-    pika_lvgl_canvas_get_px,
-    "get_px", "x,y,color,opa"
-);
-
-void pika_lvgl_canvas_set_bufferMethod(PikaObj *self, Args *args){
-    Arg* buf = args_getArg(args, "buf");
-    int w = args_getInt(args, "w");
-    int h = args_getInt(args, "h");
-    int cf = args_getInt(args, "cf");
-    pika_lvgl_canvas_set_buffer(self, buf, w, h, cf);
-}
-method_typedef(
-    pika_lvgl_canvas_set_buffer,
-    "set_buffer", "buf,w,h,cf"
-);
-
-void pika_lvgl_canvas_set_paletteMethod(PikaObj *self, Args *args){
-    int id = args_getInt(args, "id");
-    PikaObj* c = args_getPtr(args, "c");
-    pika_lvgl_canvas_set_palette(self, id, c);
-}
-method_typedef(
-    pika_lvgl_canvas_set_palette,
-    "set_palette", "id,c"
-);
-
-void pika_lvgl_canvas_set_pxMethod(PikaObj *self, Args *args){
-    int x = args_getInt(args, "x");
-    int y = args_getInt(args, "y");
-    PikaObj* color = args_getPtr(args, "color");
-    int opa = args_getInt(args, "opa");
-    pika_lvgl_canvas_set_px(self, x, y, color, opa);
-}
-method_typedef(
-    pika_lvgl_canvas_set_px,
-    "set_px", "x,y,color,opa"
-);
-
-void pika_lvgl_canvas_transformMethod(PikaObj *self, Args *args){
-    PikaObj* img = args_getPtr(args, "img");
-    int angle = args_getInt(args, "angle");
-    int zoom = args_getInt(args, "zoom");
-    int offset_x = args_getInt(args, "offset_x");
-    int offset_y = args_getInt(args, "offset_y");
-    int pivot_x = args_getInt(args, "pivot_x");
-    int pivot_y = args_getInt(args, "pivot_y");
-    PIKA_BOOL antialias = args_getBool(args, "antialias");
-    pika_lvgl_canvas_transform(self, img, angle, zoom, offset_x, offset_y, pivot_x, pivot_y, antialias);
-}
-method_typedef(
-    pika_lvgl_canvas_transform,
-    "transform", "img,angle,zoom,offset_x,offset_y,pivot_x,pivot_y,antialias"
-);
-
-class_def(pika_lvgl_canvas){
-    __BEFORE_MOETHOD_DEF
-    method_def(pika_lvgl_canvas_set_buffer, 122623658),
-    method_def(pika_lvgl_canvas_set_px, 461713144),
-    method_def(pika_lvgl_canvas_transform, 596893057),
-    method_def(pika_lvgl_canvas_fill_bg, 742436052),
-    method_def(pika_lvgl_canvas___init__, 904762485),
-    method_def(pika_lvgl_canvas_copy_buf, 1202591868),
-    method_def(pika_lvgl_canvas_get_img, 1886393889),
-    method_def(pika_lvgl_canvas_set_palette, 2024167679),
-    method_def(pika_lvgl_canvas_get_px, 2139572076),
-};
-class_inhert(pika_lvgl_canvas, pika_lvgl_lv_obj);
-
-PikaObj *New_pika_lvgl_canvas(Args *args){
-    PikaObj *self = New_pika_lvgl_lv_obj(args);
-    obj_setClass(self, pika_lvgl_canvas);
-    return self;
-}
-
-Arg *pika_lvgl_canvas(PikaObj *self){
-    return obj_newObjInPackage(New_pika_lvgl_canvas);
-}
-#endif
-
-#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
-void pika_lvgl_cf_t___init__Method(PikaObj *self, Args *args){
-    pika_lvgl_cf_t___init__(self);
-}
-method_typedef(
-    pika_lvgl_cf_t___init__,
-    "__init__", ""
-);
-
-class_def(pika_lvgl_cf_t){
-    __BEFORE_MOETHOD_DEF
-    method_def(pika_lvgl_cf_t___init__, 904762485),
-};
-class_inhert(pika_lvgl_cf_t, TinyObj);
-
-PikaObj *New_pika_lvgl_cf_t(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, pika_lvgl_cf_t);
-    return self;
-}
-
-Arg *pika_lvgl_cf_t(PikaObj *self){
-    return obj_newObjInPackage(New_pika_lvgl_cf_t);
-}
-#endif
-
-#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
-void pika_lvgl_chart___init__Method(PikaObj *self, Args *args){
-    PikaObj* parent = args_getPtr(args, "parent");
-    pika_lvgl_chart___init__(self, parent);
-}
-method_typedef(
-    pika_lvgl_chart___init__,
-    "__init__", "parent"
-);
-
-void pika_lvgl_chart_add_seriesMethod(PikaObj *self, Args *args){
-    PikaObj* color = args_getPtr(args, "color");
-    int axis = args_getInt(args, "axis");
-    PikaObj* res = pika_lvgl_chart_add_series(self, color, axis);
-    method_returnObj(args, res);
-}
-method_typedef(
-    pika_lvgl_chart_add_series,
-    "add_series", "color,axis"
-);
-
-void pika_lvgl_chart_get_series_nextMethod(PikaObj *self, Args *args){
-    PikaObj* ser = args_getPtr(args, "ser");
-    PikaObj* res = pika_lvgl_chart_get_series_next(self, ser);
-    method_returnObj(args, res);
-}
-method_typedef(
-    pika_lvgl_chart_get_series_next,
-    "get_series_next", "ser"
-);
-
-void pika_lvgl_chart_refreshMethod(PikaObj *self, Args *args){
-    pika_lvgl_chart_refresh(self);
-}
-method_typedef(
-    pika_lvgl_chart_refresh,
-    "refresh", ""
-);
-
-void pika_lvgl_chart_set_ext_y_arrayMethod(PikaObj *self, Args *args){
-    PikaObj* ser = args_getPtr(args, "ser");
-    Arg* array = args_getArg(args, "array");
-    pika_lvgl_chart_set_ext_y_array(self, ser, array);
-}
-method_typedef(
-    pika_lvgl_chart_set_ext_y_array,
-    "set_ext_y_array", "ser,array"
-);
-
-void pika_lvgl_chart_set_point_countMethod(PikaObj *self, Args *args){
-    int cnt = args_getInt(args, "cnt");
-    pika_lvgl_chart_set_point_count(self, cnt);
-}
-method_typedef(
-    pika_lvgl_chart_set_point_count,
-    "set_point_count", "cnt"
-);
-
-void pika_lvgl_chart_set_rangeMethod(PikaObj *self, Args *args){
-    int axis = args_getInt(args, "axis");
-    int min = args_getInt(args, "min");
-    int max = args_getInt(args, "max");
-    pika_lvgl_chart_set_range(self, axis, min, max);
-}
-method_typedef(
-    pika_lvgl_chart_set_range,
-    "set_range", "axis,min,max"
-);
-
-void pika_lvgl_chart_set_zoom_xMethod(PikaObj *self, Args *args){
-    int zoom_x = args_getInt(args, "zoom_x");
-    pika_lvgl_chart_set_zoom_x(self, zoom_x);
-}
-method_typedef(
-    pika_lvgl_chart_set_zoom_x,
-    "set_zoom_x", "zoom_x"
-);
-
-void pika_lvgl_chart_set_zoom_yMethod(PikaObj *self, Args *args){
-    int zoom_y = args_getInt(args, "zoom_y");
-    pika_lvgl_chart_set_zoom_y(self, zoom_y);
-}
-method_typedef(
-    pika_lvgl_chart_set_zoom_y,
-    "set_zoom_y", "zoom_y"
-);
-
-class_def(pika_lvgl_chart){
-    __BEFORE_MOETHOD_DEF
-    method_def(pika_lvgl_chart_get_series_next, 96779661),
-    method_def(pika_lvgl_chart_set_point_count, 514208098),
-    method_def(pika_lvgl_chart_add_series, 746843960),
-    method_def(pika_lvgl_chart_set_ext_y_array, 843544855),
-    method_def(pika_lvgl_chart___init__, 904762485),
-    method_def(pika_lvgl_chart_refresh, 1044231764),
-    method_def(pika_lvgl_chart_set_zoom_x, 1055088428),
-    method_def(pika_lvgl_chart_set_zoom_y, 1055088429),
-    method_def(pika_lvgl_chart_set_range, 1128260061),
-};
-class_inhert(pika_lvgl_chart, pika_lvgl_lv_obj);
-
-PikaObj *New_pika_lvgl_chart(Args *args){
-    PikaObj *self = New_pika_lvgl_lv_obj(args);
-    obj_setClass(self, pika_lvgl_chart);
-    return self;
-}
-
-Arg *pika_lvgl_chart(PikaObj *self){
-    return obj_newObjInPackage(New_pika_lvgl_chart);
-}
-#endif
-
-#ifndef PIKA_MODULE_PIKA_LVGL_DISABLE
-class_def(pika_lvgl_chart_series_t){
-    __BEFORE_MOETHOD_DEF
-};
-class_inhert(pika_lvgl_chart_series_t, TinyObj);
-
-PikaObj *New_pika_lvgl_chart_series_t(Args *args){
-    PikaObj *self = New_TinyObj(args);
-    obj_setClass(self, pika_lvgl_chart_series_t);
-    return self;
-}
-
-Arg *pika_lvgl_chart_series_t(PikaObj *self){
-    return obj_newObjInPackage(New_pika_lvgl_chart_series_t);
 }
 #endif
 
@@ -8405,16 +7881,6 @@ method_typedef(
     "set_size", "w,h"
 );
 
-void pika_lvgl_lv_obj_set_style_sizeMethod(PikaObj *self, Args *args){
-    int value = args_getInt(args, "value");
-    int selector = args_getInt(args, "selector");
-    pika_lvgl_lv_obj_set_style_size(self, value, selector);
-}
-method_typedef(
-    pika_lvgl_lv_obj_set_style_size,
-    "set_style_size", "value,selector"
-);
-
 void pika_lvgl_lv_obj_set_widthMethod(PikaObj *self, Args *args){
     int w = args_getInt(args, "w");
     pika_lvgl_lv_obj_set_width(self, w);
@@ -8499,7 +7965,6 @@ class_def(pika_lvgl_lv_obj){
     method_def(pika_lvgl_lv_obj_move_to, 1439197854),
     method_def(pika_lvgl_lv_obj_add_state, 1454808302),
     method_def(pika_lvgl_lv_obj_add_style, 1454834174),
-    method_def(pika_lvgl_lv_obj_set_style_size, 1456395227),
     method_def(pika_lvgl_lv_obj_is_visible, 1459230894),
     method_def(pika_lvgl_lv_obj_clear_flag, 1542104037),
     method_def(pika_lvgl_lv_obj_get_self_width, 1660554189),

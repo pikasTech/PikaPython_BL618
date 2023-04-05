@@ -24,10 +24,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef __PIKA_CFG_VALID_H__
 #define __PIKA_CFG_VALID_H__
 
@@ -407,14 +403,6 @@ extern "C" {
         #define PIKA_FREERTOS_ENABLE 0
     #endif
 
-    #ifndef PIKA_RTTHREAD_ENABLE
-        #define PIKA_RTTHREAD_ENABLE 0
-    #endif
-
-    #ifndef PIKA_LINUX_COMPATIBLE
-        #define PIKA_LINUX_COMPATIBLE 0
-    #endif
-
     #ifndef PIKA_LWIP_ENABLE
         #define PIKA_LWIP_ENABLE 0
     #endif
@@ -465,7 +453,4 @@ extern "C" {
 
     /* configuration validation */
 
-#endif
-#ifdef __cplusplus
-}
 #endif

@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef __PIKA_ADAPTER_RTT_H__
 #include <stdint.h>
 #include "PikaPlatform.h"
@@ -55,8 +51,4 @@ extern "C" {
 
 #define RT_ASSERT(...) pika_assert(__VA_ARGS__)
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif

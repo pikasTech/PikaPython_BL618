@@ -63,7 +63,6 @@ void pika_lvgl_lv_obj_set_id(PikaObj *self, char* id);
 void pika_lvgl_lv_obj_set_layout(PikaObj *self, int layout);
 void pika_lvgl_lv_obj_set_pos(PikaObj *self, int x, int y);
 void pika_lvgl_lv_obj_set_size(PikaObj *self, int w, int h);
-void pika_lvgl_lv_obj_set_style_size(PikaObj *self, int value, int selector);
 void pika_lvgl_lv_obj_set_width(PikaObj *self, int w);
 void pika_lvgl_lv_obj_set_x(PikaObj *self, int x);
 void pika_lvgl_lv_obj_set_y(PikaObj *self, int y);

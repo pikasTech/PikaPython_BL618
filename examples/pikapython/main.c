@@ -1,65 +1,17 @@
-// C标准库
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// Pikascript相关
 #include "./pikapython/pikascript-lib/PikaStdDevice/pika_hal.h"
-#include "pikaScript.h"
-
-// 板级驱动
-#include "bflb_adc.h"
-#include "bflb_cam.h"
-#include "bflb_dma.h"
 #include "bflb_flash.h"
 #include "bflb_gpio.h"
-#include "bflb_l1c.h"
-#include "bflb_mtimer.h"
 #include "bflb_uart.h"
 #include "board.h"
-#include "csi_rv32_gcc.h"
-#include "image_sensor.h"
-#include "touch.h"
-
-// USB驱动
-#include "usbd_cdc_user.h"
-
-// Log库
 #include "log.h"
-
-// LVGL图形库
-#include "lv_conf.h"
-#include "lv_port_disp.h"
-#include "lv_port_indev.h"
-#include "lvgl.h"
-
-// LCD驱动
-#include "lcd.h"
-
-// FreeRTOS库（可选）
+#include "usbd_cdc_user.h"
+// #include "lwip/init.h"
+#include "pikaScript.h"
 #if PIKA_FREERTOS_ENABLE
 #include "FreeRTOS.h"
 #include "task.h"
-#endif
-
-// 日志库
-#include "log.h"
-
-// FatFS库
-#include "fatfs_diskio_register.h"
-#include "ff.h"
-
-/* bsp config for PikaPython */
-#define USING_USB_CDC 1
-#define USING_LVGL 1
-#define USING_FLASH_READ 1
-
-#define USING_KEY_ERAISE 0
-#define USING_FORCE_ERASE 0
-
-/* valid check for bsp config */
-#if USING_KEY_ERAISE && USING_LVGL
-#error "Using key eraise and lvgl at the same time is not supported"
 #endif
 
 #if defined(BL616)
@@ -72,21 +24,28 @@
 #include "bl808_glb.h"
 #endif
 
+#define REPL_UART0 0
+#define REPL_USB 1
+
+#define REPL_PORT REPL_USB
+
 struct bflb_device_s* uartx = NULL;
+// static uint8_t freertos_heap[configTOTAL_HEAP_SIZE];
 
 volatile FILE g_pika_app_flash_file = {0};
 volatile int g_pika_app_flash_pos = 0;
-static volatile int g_usb_cdc_init = 0;
 #define _PIKA_APP_FLASH_ADDR 0x100000   // 1M
-#define _PIKA_APP_FLASH_SIZE 24 * 1024  // 24K
+#define _PIKA_APP_FLASH_SIZE 32 * 1024  // 32K
 
 #define _PIKA_APP_FLASH_INITED 0xFE
 #define _PIKA_APP_FLASH_VOID 0xFF
 #define _PIKA_APP_FLASH_SAVED 0x0F
 
-static struct bflb_device_s* adc;
-
-static int filesystem_init(void);
+// static HeapRegion_t xHeapRegions[] = {
+//     {(uint8_t*)freertos_heap, 0},
+//     {NULL, 0}, /* Terminates the array. */
+//     {NULL, 0}  /* Terminates the array. */
+// };
 
 static int _pika_app_check(void) {
     uint8_t buf = {0};
@@ -100,11 +59,12 @@ static int _pika_app_check(void) {
 
 #define ERAISE_BATCH_SIZE (_PIKA_APP_FLASH_SIZE / 1)
 
-static int _do_eraise_app(void) {
+static int _do_eraise_app(void){
     for (uint32_t i = 0; i < (_PIKA_APP_FLASH_SIZE / ERAISE_BATCH_SIZE); i++) {
         int ret = 0;
-        ret = bflb_flash_erase(_PIKA_APP_FLASH_ADDR + i * ERAISE_BATCH_SIZE,
-                               ERAISE_BATCH_SIZE);
+        ret = bflb_flash_erase(
+            _PIKA_APP_FLASH_ADDR + i * ERAISE_BATCH_SIZE,
+            ERAISE_BATCH_SIZE);
         if (ret != 0) {
             pika_platform_printf("Erase app.pika failed\r\n");
             return -1;
@@ -113,35 +73,25 @@ static int _do_eraise_app(void) {
     return 0;
 }
 
-static void _eraise_app(void) {
+static void _eraise_app(void){
     pika_platform_printf("Erasing app.pika...\r\n");
-    // pika_platform_printf("Please release the button\r\n");
+    pika_platform_printf("Please release the button\r\n");
     _do_eraise_app();
     pika_platform_printf("Erase app.pika done\r\n");
+    pika_platform_reboot();
 }
 
 uint8_t _pika_app_buf[_PIKA_APP_FLASH_SIZE] = {0};
 static void consumer_task(void* pvParameters) {
-#if USING_USB_CDC
     cdc_acm_init();
-#endif
     vTaskDelay(1000);
-    g_usb_cdc_init = 1;
-    // init_cam(bflb_device_get_by_name("gpio"));
-
-#if USING_KEY_ERAISE
     struct bflb_device_s* gpio = bflb_device_get_by_name("gpio");
     bflb_gpio_init(gpio, GPIO_PIN_33,
                    GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
     vTaskDelay(100);
-    if (bflb_gpio_read(gpio, GPIO_PIN_33) == 0) {
+    if (bflb_gpio_read(gpio, GPIO_PIN_33) == 0){
         _eraise_app();
     }
-#endif
-
-#if USING_FORCE_ERASE
-    _eraise_app();
-#endif
 
     PikaObj* root = newRootObj("root", New_PikaMain);
     if (_pika_app_check()) {
@@ -171,23 +121,11 @@ static void _erase_app_task(void* pvParameters) {
             time++;
             if (time > 100) {
                 _eraise_app();
-                pika_platform_reboot();
             }
         } else {
             time = 0;
         }
         vTaskDelay(10);
-    }
-}
-
-void lv_log_print_g_cb(const char* buf) {
-    printf("[LVGL] %s", buf);
-}
-
-static void lvgl_task(void* pvParameters) {
-    while (1) {
-        lv_task_handler();
-        vTaskDelay(1);
     }
 }
 
@@ -198,104 +136,53 @@ static void usb_cdc_fflush_task(void* pvParameters) {
     }
 }
 
-static void init_filesystem(void) {
-    filesystem_init();
-}
-
-static void init_gpio(struct bflb_device_s **gpio) {
-    *gpio = bflb_device_get_by_name("gpio");
-    /* backlight pin */
-    bflb_gpio_init(*gpio, GPIO_PIN_2, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
-    bflb_gpio_set(*gpio, GPIO_PIN_2);
-}
-
-static void init_lvgl(void) {
-    /* lvgl init */
-    struct bflb_device_s *gpio;
-    init_gpio(&gpio);
-    lv_log_register_print_cb(lv_log_print_g_cb);
-    lv_init();
-    lv_port_disp_init();
-    uint8_t point_num = 0;
-
-    touch_coord_t touch_max_point = {
-        .coord_x = LCD_W,
-        .coord_y = LCD_H,
-    };
-    touch_init(&touch_max_point);
-
-    touch_coord_t touch_coord;
-    int ret = touch_read(&point_num, &touch_coord, 1);
-    printf("touch_read ret:%d\r\n", ret);
-    /* check touch is connected */
-    if(ret == 0){
-        lv_port_indev_init();
-    }
-
-    LOG_I("lvgl success\r\n");
-}
-
-static void create_tasks(void) {
-#if PIKA_FREERTOS_ENABLE
-    xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
-#if USING_KEY_ERAISE
-    xTaskCreate(_erase_app_task, (char *)"erase_app_task", 8192, NULL,
-                configMAX_PRIORITIES - 1, NULL);
-#endif
-#if USING_USB_CDC
-    xTaskCreate(usb_cdc_fflush_task, (char *)"usb_cdc_fflush_task", 1024, NULL,
-                1, NULL);
-#endif
-#if USING_LVGL
-    xTaskCreate(lvgl_task, (char *)"lvgl_task", 8 * 1024, NULL,
-                configMAX_PRIORITIES - 2, NULL);
-#endif
-    vTaskStartScheduler();
-#endif
-}
-
 int main(void) {
     board_init();
+    #if REPL_PORT == REPL_UART0
+    uartx = bflb_device_get_by_name("uart0");
+    bflb_uart_feature_control(uartx, UART_CMD_SET_BAUD_RATE, 115200);
+    #endif
+    // xHeapRegions[0].xSizeInBytes = configTOTAL_HEAP_SIZE;
+    // vPortDefineHeapRegions(xHeapRegions);
+    // printf("Heap size: %d\r\n", configTOTAL_HEAP_SIZE);
 
-    init_filesystem();
-
-#if USING_LVGL
-    init_lvgl();
+#if PIKA_FREERTOS_ENABLE
+    xTaskCreate(_erase_app_task, (char*)"erase_app_task", 8192, NULL,
+                configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(consumer_task, (char*)"consumer_task", 8 * 1024, NULL, 3, NULL);
+    xTaskCreate(usb_cdc_fflush_task, (char*)"usb_cdc_fflush_task", 1024, NULL,
+                1, NULL);
+    vTaskStartScheduler();
+#else
+    consumer_task(NULL);
 #endif
-
-    create_tasks();
 
     while (1) {
-        /* delay */
-#if PIKA_FREERTOS_ENABLE
-        vTaskDelay(10);
-#else
-        bflb_mtimer_delay_ms(10);
-#endif
     }
 }
 
 /* Platform Porting */
+
 char pika_platform_getchar(void) {
-#if !USING_USB_CDC
+    #if REPL_PORT == REPL_UART0
     while (1) {
         int c = bflb_uart_getchar(uartx);
         if (c != -1) {
             return c;
         }
     }
-#else
+    #elif REPL_PORT == REPL_USB
     return usb_cdc_user_getchar();
-#endif
+    #endif
 }
 
 int pika_platform_putchar(char ch) {
-#if !USING_USB_CDC
+    #if REPL_PORT == REPL_UART0
     bflb_uart_putchar(uartx, ch);
     return 0;
-#else
+    #elif REPL_PORT == REPL_USB
     return usb_cdc_user_putchar(ch);
-#endif
+    #endif
 }
 
 void pika_platform_reboot(void) {
@@ -346,15 +233,11 @@ size_t pika_platform_fwrite(const void* ptr,
     return 0;
 }
 
+/* fread */
 size_t pika_platform_fread(void* ptr, size_t size, size_t n, FILE* stream) {
     if (stream == (FILE*)&g_pika_app_flash_file) {
-#if USING_FLASH_READ
         bflb_flash_read(_PIKA_APP_FLASH_ADDR + g_pika_app_flash_pos,
                         (uint8_t*)ptr, size * n);
-#else
-        memcpy(ptr, (const void*)(_PIKA_APP_FLASH_ADDR + g_pika_app_flash_pos),
-               size * n);
-#endif
         g_pika_app_flash_pos += size * n;
         return size * n;
     }
@@ -371,57 +254,4 @@ int pika_platform_fclose(FILE* stream) {
         return 0;
     }
     return -1;
-}
-
-static int filesystem_init(void) {
-    static FATFS fs;
-    static __attribute((aligned(8))) uint32_t workbuf[4 * 1024];
-
-    MKFS_PARM fs_para = {
-        .fmt = FM_FAT32,     /* Format option (FM_FAT, FM_FAT32, FM_EXFAT and
-                                FM_SFD) */
-        .n_fat = 1,          /* Number of FATs */
-        .align = 0,          /* Data area alignment (sector) */
-        .n_root = 1,         /* Number of root directory entries */
-        .au_size = 512 * 32, /* Cluster size (byte) */
-    };
-
-    FRESULT ret;
-
-    board_sdh_gpio_init();
-
-    fatfs_sdh_driver_register();
-
-    ret = f_mount(&fs, "/sd", 1);
-
-    if (ret == FR_NO_FILESYSTEM) {
-        LOG_W("No filesystem yet, try to be formatted...\r\n");
-
-        ret = f_mkfs("/sd", &fs_para, workbuf, sizeof(workbuf));
-
-        if (ret != FR_OK) {
-            LOG_F("fail to make filesystem\r\n");
-            return ret;
-        }
-
-        if (ret == FR_OK) {
-            LOG_I("done with formatting.\r\n");
-            LOG_I("first start to unmount.\r\n");
-            ret = f_mount(NULL, "/sd", 1);
-            LOG_I("then start to remount.\r\n");
-        }
-    } else if (ret != FR_OK) {
-        LOG_F("fail to mount filesystem,error= %d\r\n", ret);
-        LOG_F("SD card might fail to initialise.\r\n");
-        return ret;
-    } else {
-        LOG_D("Succeed to mount filesystem\r\n");
-    }
-
-    if (ret == FR_OK) {
-        LOG_I("FileSystem cluster size:%d-sectors (%d-Byte)\r\n", fs.csize,
-              fs.csize * 512);
-    }
-
-    return ret;
 }
