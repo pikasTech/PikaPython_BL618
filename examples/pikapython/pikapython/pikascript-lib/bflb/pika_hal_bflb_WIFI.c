@@ -12,7 +12,7 @@
 #include "bl616_glb.h"
 #include "pika_hal_bflb_common.h"
 
-#define WIFI_STACK_SIZE  (1024 * 2)
+#define WIFI_STACK_SIZE  (1024 * 4)
 #define TASK_PRIORITY_FW (16)
 
 static TaskHandle_t wifi_fw_task;
@@ -22,6 +22,7 @@ static wifi_conf_t conf = {
 };
 
 static volatile int g_wifi_active = 0;
+static volatile int g_wifi_connected = 0;
 
 #define LOG_I printf
 
@@ -46,9 +47,13 @@ void wifi_event_handler(uint32_t code)
         } break;
         case CODE_WIFI_ON_GOT_IP: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_GOT_IP\r\n", __func__);
+            pika_debug("wifi connected");
+            g_wifi_connected = 1;
         } break;
         case CODE_WIFI_ON_DISCONNECT: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT\r\n", __func__);
+            pika_debug("wifi disconnected");
+            g_wifi_connected = 0;
         } break;
         case CODE_WIFI_ON_AP_STARTED: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_AP_STARTED\r\n", __func__);
@@ -128,7 +133,15 @@ int pika_hal_platform_WIFI_ioctl_others(pika_dev* dev, PIKA_HAL_IOCTL_CMD cmd, v
     switch (cmd) {
         case PIKA_HAL_IOCTL_WIFI_GET_STATUS:
             // Call the appropriate function to get Wi-Fi status
-            break;
+            if(g_wifi_connected){
+                *(PIKA_HAL_WIFI_STATUS*)arg = PIKA_HAL_WIFI_STATUS_GOT_IP;
+                pika_debug("wifi status: got ip");
+            }else{
+                *(PIKA_HAL_WIFI_STATUS*)arg = PIKA_HAL_WIFI_STATUS_CONNECTING;
+                pika_debug("wifi status: connecting");
+                return 0;
+            }
+            return 0;
         case PIKA_HAL_IOCTL_WIFI_GET_ACTIVE:
             // Call the appropriate function to get Wi-Fi active state
             *(int*)arg = g_wifi_active;
@@ -141,10 +154,8 @@ int pika_hal_platform_WIFI_ioctl_others(pika_dev* dev, PIKA_HAL_IOCTL_CMD cmd, v
             pika_debug("ioctl connect");
             pika_hal_WIFI_connect_config* conncfg =
                 (pika_hal_WIFI_connect_config*)arg;
-            // ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &esp_wifi_cfg));
-            // strcpy((char*)esp_wifi_cfg.sta.ssid, conncfg->ssid);
-            // strcpy((char*)esp_wifi_cfg.sta.password, conncfg->password);
-            return 0;
+            int ret = wifi_sta_connect(conncfg->ssid, conncfg->password, NULL, NULL, 1, 0, 0, 1);
+            return ret;
         case PIKA_HAL_IOCTL_WIFI_GET_IFCONFIG:
             // Call the appropriate function to get Wi-Fi interface configuration
             break;

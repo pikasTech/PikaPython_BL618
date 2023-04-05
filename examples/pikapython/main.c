@@ -51,7 +51,8 @@
 
 /* bsp config for PikaPython */
 #define USING_USB_CDC 1
-#define USING_LVGL 1
+#define USING_LVGL 0
+#define USING_TOUCH 0
 #define USING_APP_XIP 1
 
 #define USING_KEY_ERAISE 0
@@ -60,6 +61,10 @@
 /* valid check for bsp config */
 #if USING_KEY_ERAISE && USING_LVGL
 #error "Using key eraise and lvgl at the same time is not supported"
+#endif
+
+#if !USING_LVGL && USING_TOUCH
+#error "Using touch and not using lvgl at the same time is not supported"
 #endif
 
 #if defined(BL616)
@@ -231,12 +236,12 @@ static void init_lvgl(void) {
     lv_port_disp_init();
     uint8_t point_num = 0;
 
+#if USING_TOUCH
     touch_coord_t touch_max_point = {
         .coord_x = LCD_W,
         .coord_y = LCD_H,
     };
     touch_init(&touch_max_point);
-
     touch_coord_t touch_coord;
     int ret = touch_read(&point_num, &touch_coord, 1);
     printf("touch_read ret:%d\r\n", ret);
@@ -244,6 +249,7 @@ static void init_lvgl(void) {
     if(ret == 0){
         lv_port_indev_init();
     }
+#endif
 
     LOG_I("lvgl success\r\n");
 }
@@ -261,7 +267,7 @@ static void create_tasks(void) {
 #endif
 #if USING_LVGL
     xTaskCreate(lvgl_task, (char *)"lvgl_task", 8 * 1024, NULL,
-                configMAX_PRIORITIES - 2, NULL);
+                configMAX_PRIORITIES - 16, NULL);
 #endif
     vTaskStartScheduler();
 #endif
