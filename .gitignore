@@ -12,3 +12,4 @@
 *.svd
 *.pack
 **/_build
+/tools/toolchain_gcc_t-head_windows

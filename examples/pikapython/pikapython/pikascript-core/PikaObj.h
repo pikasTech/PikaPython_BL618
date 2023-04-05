@@ -25,6 +25,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef _Process__H
 #define _Process__H
@@ -392,6 +395,24 @@ Method obj_getNativeMethod(PikaObj* self, char* method_name);
 PIKA_RES obj_runNativeMethod(PikaObj* self, char* method_name, Args* args);
 Arg* obj_newObjInPackage(NewFun newObjFun);
 
+/* A helper function to create a new tuple PikaObj and append the given
+ * arguments (of type Arg*) to it. */
+PikaObj* _pika_tuple_new(int num_args, ...);
+
+/* A helper function to create a new list PikaObj and append the given arguments
+ * (of type Arg*) to it. */
+PikaObj* _pika_list_new(int num_args, ...);
+
+/* Macro to create a new tuple PikaObj with the given arguments (of type Arg*).
+ */
+#define obj_newTuple(...) \
+    _pika_tuple_new(sizeof((Arg*[]){__VA_ARGS__}) / sizeof(Arg*), __VA_ARGS__)
+
+/* Macro to create a new list PikaObj with the given arguments (of type Arg*).
+ */
+#define obj_newList(...) \
+    _pika_list_new(sizeof((Arg*[]){__VA_ARGS__}) / sizeof(Arg*), __VA_ARGS__)
+
 PikaObj* newNormalObj(NewFun newObjFun);
 Arg* arg_setRef(Arg* self, char* name, PikaObj* obj);
 Arg* arg_setObj(Arg* self, char* name, PikaObj* obj);
@@ -620,10 +641,18 @@ Arg* pks_eventListener_sendSignalAwaitResult(PikaEventListener* self,
                                              uint32_t eventId,
                                              int eventSignal);
 
+#define COLOR_RED "\x1b[31m"
+#define COLOR_GREEN "\x1b[32m"
+#define COLOR_YELLOW "\x1b[33m"
+#define COLOR_BLUE "\x1b[34m"
+#define COLOR_MAGENTA "\x1b[35m"
+#define COLOR_CYAN "\x1b[36m"
+#define COLOR_RESET "\x1b[0m"
+
 void obj_printModules(PikaObj* self);
 #if PIKA_DEBUG_ENABLE
 #define pika_debug(fmt, ...) \
-    pika_platform_printf("PikaDBG: " fmt "\r\n", ##__VA_ARGS__)
+    pika_platform_printf(COLOR_GREEN "[PikaDBG] " fmt "\r\n" COLOR_RESET, ##__VA_ARGS__)
 #else
 #define pika_debug(...) \
     do {                \
@@ -663,4 +692,7 @@ uint32_t pikaGC_printFreeList(void);
 int pika_GIL_EXIT(void);
 int pika_GIL_ENTER(void);
 
+#endif
+#ifdef __cplusplus
+}
 #endif

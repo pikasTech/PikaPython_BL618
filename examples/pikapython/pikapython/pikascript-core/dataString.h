@@ -24,7 +24,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef __MY_TEST_TOOLS_H
 #define __MY_TEST_TOOLS_H
 #include "PikaPlatform.h"
@@ -67,5 +69,10 @@ int strPathFormat(char* input, char* output);
 int strPathJoin(char* input1, char* input2, char* output);
 int strPathGetFolder(char* input, char* output);
 int strPathGetFileName(char* input, char* output);
+int strGetIndent(char* string);
+int strIsBlank(char* string);
 
+#endif
+#ifdef __cplusplus
+}
 #endif

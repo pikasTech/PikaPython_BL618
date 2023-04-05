@@ -5156,8 +5156,7 @@ static int gsl2038_i2c_read_byte(uint16_t register_addr, uint8_t *data_buf, uint
     msg[1].flags = I2C_M_READ;
     msg[1].buffer = data_buf;
     msg[1].length = len;
-    bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
-    return 0;
+    return bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
 }
 
 static int gsl2038_i2c_write_byte(uint16_t register_addr, uint8_t *data_buf, uint16_t len)

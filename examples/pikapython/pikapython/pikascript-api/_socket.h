@@ -9,13 +9,15 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __pika_libc__H
-#define __pika_libc__H
+#ifndef ___socket__H
+#define ___socket__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_pika_libc(Args *args);
+PikaObj *New__socket(Args *args);
 
+char* _socket__gethostname(PikaObj *self);
+Arg* _socket_socket(PikaObj *self);
 
 #endif

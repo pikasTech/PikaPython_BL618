@@ -1,17 +1,11 @@
 import PikaStdLib
-import random
 import PikaStdData
-import configparser
-import pika_cjson
 import PikaMath
-import unittest
-import re
-import binascii
-import modbus
-import time
-import pika_lvgl
-import _thread
+import binascii, re, unittest, configparser, _thread
+import json, time, modbus, random
+import lvgl
 import machine
 import example
-import json
+import bflb
+import network, socket
 print('hello PikaPython!')

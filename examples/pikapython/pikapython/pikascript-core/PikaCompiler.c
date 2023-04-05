@@ -126,7 +126,7 @@ PIKA_RES pikaCompile(char* output_file_name, char* py_lines) {
     bytecode_frame.instruct_array.output_f = bytecode_f;
     bytecode_frame.instruct_array.output_redirect_fun =
         __handler_instructArray_output_none;
-    res = Parser_linesToBytes(&bytecode_frame, py_lines);
+    res = pika_lines2Bytes(&bytecode_frame, py_lines);
     if (PIKA_RES_OK != res) {
         pika_platform_printf("    Error: Syntax error.\r\n");
         goto exit;
@@ -151,7 +151,7 @@ PIKA_RES pikaCompile(char* output_file_name, char* py_lines) {
     /* instruct array to file */
     bytecode_frame.instruct_array.output_redirect_fun =
         __handler_instructArray_output_file;
-    Parser_linesToBytes(&bytecode_frame, py_lines);
+    pika_lines2Bytes(&bytecode_frame, py_lines);
     byteCodeFrame_deinit(&bytecode_frame);
 
     /* step 3, write const pool to file */
@@ -169,7 +169,7 @@ PIKA_RES pikaCompile(char* output_file_name, char* py_lines) {
     /* instruct array to none */
     bytecode_frame.instruct_array.output_redirect_fun =
         __handler_instructArray_output_none;
-    Parser_linesToBytes(&bytecode_frame, py_lines);
+    pika_lines2Bytes(&bytecode_frame, py_lines);
 
     /* deinit */
 exit:
@@ -319,7 +319,7 @@ static int32_t __foreach_handler_libWriteBytecode(Arg* argEach, void* context) {
         char* bytecode = obj_getPtr(module_obj, "bytecode");
         size_t bytecode_size = obj_getBytesSize(module_obj, "buff");
         size_t aline_size =
-            aline_by(bytecode_size, sizeof(uint32_t)) - bytecode_size;
+            align_by(bytecode_size, sizeof(uint32_t)) - bytecode_size;
         char aline_buff[sizeof(uint32_t)] = {0};
         pika_platform_fwrite(bytecode, 1, bytecode_size, out_file);
         pika_platform_fwrite(aline_buff, 1, aline_size, out_file);
@@ -327,6 +327,7 @@ static int32_t __foreach_handler_libWriteBytecode(Arg* argEach, void* context) {
     return 0;
 }
 
+#define NAME_BUFF_SIZE LIB_INFO_BLOCK_SIZE - sizeof(uint32_t)
 static int32_t __foreach_handler_libWriteIndex(Arg* argEach, void* context) {
     Args* args = context;
     FILE* out_file = args_getPtr(args, "out_file");
@@ -334,14 +335,13 @@ static int32_t __foreach_handler_libWriteIndex(Arg* argEach, void* context) {
     if (arg_isObject(argEach)) {
         PikaObj* module_obj = arg_getPtr(argEach);
         uint32_t bytecode_size = obj_getBytesSize(module_obj, "buff");
-        char buff[LIB_INFO_BLOCK_SIZE - sizeof(uint32_t)] = {0};
-        bytecode_size = aline_by(bytecode_size, sizeof(uint32_t));
+        char name_buff[NAME_BUFF_SIZE] = {0};
+        // bytecode_size = align_by(bytecode_size, sizeof(uint32_t));
         char* module_name = obj_getStr(module_obj, "name");
         module_name = strsReplace(&buffs, module_name, "|", ".");
         // pika_platform_printf("   %s:%d\r\n", module_name, bytecode_size);
-        pika_platform_memcpy(buff, module_name, strGetSize(module_name));
-        pika_platform_fwrite(
-            buff, 1, LIB_INFO_BLOCK_SIZE - sizeof(bytecode_size), out_file);
+        pika_platform_memcpy(name_buff, module_name, strGetSize(module_name));
+        pika_platform_fwrite(name_buff, 1, NAME_BUFF_SIZE, out_file);
         pika_platform_fwrite(&bytecode_size, 1, sizeof(bytecode_size),
                              out_file);
     }
@@ -354,7 +354,7 @@ static int32_t __foreach_handler_libSumSize(Arg* argEach, void* context) {
     if (arg_isObject(argEach)) {
         PikaObj* module_obj = arg_getPtr(argEach);
         uint32_t bytecode_size = obj_getBytesSize(module_obj, "buff");
-        bytecode_size = aline_by(bytecode_size, sizeof(uint32_t));
+        bytecode_size = align_by(bytecode_size, sizeof(uint32_t));
         args_setInt(args, "sum_size",
                     args_getInt(args, "sum_size") + bytecode_size);
     }
@@ -467,7 +467,22 @@ static PIKA_RES _loadModuleDataWithIndex(uint8_t* library_bytes,
         size_t module_size =
             *(uint32_t*)(module_name + LIB_INFO_BLOCK_SIZE - sizeof(uint32_t));
         *size = module_size;
-        bytecode_addr += module_size;
+        /* fix size for string */
+        PIKA_BOOL bIsString = PIKA_TRUE;
+        for (size_t i = 0; i < *size - 1; ++i) {
+            if (bytecode_addr[i] == 0) {
+                bIsString = PIKA_FALSE;
+                break;
+            }
+        }
+        if (bIsString) {
+            /* remove the last '\0' for stirng */
+            if (bytecode_addr[*size - 1] == 0) {
+                *size -= 1;
+            }
+        }
+        /* next module */
+        bytecode_addr += align_by(module_size, sizeof(uint32_t));
     }
     return PIKA_RES_OK;
 }
@@ -586,7 +601,7 @@ int LibObj_loadLibraryFile(LibObj* self, char* lib_file_name) {
  * @param out_path   output path
  * @return
  */
-PIKA_RES LibObj_unpackFileToPath(char* pack_name, char* out_path) {
+PIKA_RES pikafs_unpack_files(char* pack_name, char* out_path) {
     PIKA_RES stat = PIKA_RES_OK;
     Arg* file_arg = NULL;
     uint8_t* library_bytes = NULL;
@@ -616,11 +631,11 @@ PIKA_RES LibObj_unpackFileToPath(char* pack_name, char* out_path) {
                                  &size);
         output_file_path = strsPathJoin(&buffs, out_path, name);
         new_fp = pika_platform_fopen(output_file_path, "wb+");
+
         if (NULL != new_fp) {
             pika_platform_fwrite(addr, size, 1, new_fp);
             pika_platform_fclose(new_fp);
-            pika_platform_printf("extract %s to %s\r\n", name,
-                                 output_file_path);
+            pika_platform_printf("unpack %s to %s\r\n", name, output_file_path);
         } else {
             pika_platform_printf("can't open %s\r\n", output_file_path);
             break;
@@ -631,6 +646,34 @@ PIKA_RES LibObj_unpackFileToPath(char* pack_name, char* out_path) {
     strsDeinit(&buffs);
     pikaFree(fptr, sizeof(pikafs_FILE));
     return PIKA_RES_OK;
+}
+
+/** @brief pack files to *.pack file
+ *
+ * @param pack_name the name of *.pack file
+ * @param ...       the name of files to pack
+ * @return         PIKA_RES_OK if success
+ */
+PIKA_RES pikafs_pack_files(char* pack_name, int file_num, ...) {
+    PikaMaker* maker = New_PikaMaker();
+    PIKA_RES ret = PIKA_RES_OK;
+    va_list args;
+    va_start(args, file_num);
+    for (int i = 0; i < file_num; i++) {
+        char* file_name = va_arg(args, char*);
+        ret = pikaMaker_linkRaw(maker, file_name);
+        if (PIKA_RES_OK != ret) {
+            goto __exit;
+        }
+    }
+    ret = pikaMaker_linkCompiledModulesFullPath(maker, pack_name);
+    if (PIKA_RES_OK != ret) {
+        goto __exit;
+    }
+__exit:
+    va_end(args);
+    pikaMaker_deinit(maker);
+    return ret;
 }
 
 size_t pika_fputs(char* str, FILE* fp) {

@@ -55,6 +55,9 @@ PikaObj* New_PikaStdData_Dict(Args* args);
 PikaObj* New_PikaStdData_dict_keys(Args* args);
 PikaObj* New_PikaStdData_List(Args* args);
 PikaObj* New_PikaStdData_Tuple(Args* args);
+void PikaStdData_Tuple___init__(PikaObj *self);
+void PikaStdData_List___init__(PikaObj *self);
+void PikaStdData_List_append(PikaObj *self, Arg* arg);
 void _mem_cache_deinit(void);
 void _VMEvent_deinit(void);
 void pikaGC_markObj(PikaGC* gc, PikaObj* self);
@@ -448,6 +451,44 @@ PikaObj* obj_newObjFromConstructor(PikaObj* context,
     return self;
 }
 
+static PikaObj* _pika_new_obj_with_args(PikaObj* (*constructor)(),
+                                        void (*init_func)(PikaObj*),
+                                        int num_args,
+                                        va_list args) {
+    PikaObj* obj = newNormalObj(constructor);
+    init_func(obj);
+
+    for (int i = 0; i < num_args; i++) {
+        Arg* arg = va_arg(args, Arg*);
+        PikaStdData_List_append(obj, arg);
+        arg_deinit(arg);
+    }
+
+    return obj;
+}
+
+PikaObj* _pika_tuple_new(int num_args, ...) {
+    va_list args;
+    va_start(args, num_args);
+
+    PikaObj* tuple = _pika_new_obj_with_args(
+        New_PikaStdData_Tuple, PikaStdData_Tuple___init__, num_args, args);
+
+    va_end(args);
+    return tuple;
+}
+
+PikaObj* _pika_list_new(int num_args, ...) {
+    va_list args;
+    va_start(args, num_args);
+
+    PikaObj* list = _pika_new_obj_with_args(
+        New_PikaStdData_List, PikaStdData_List___init__, num_args, args);
+
+    va_end(args);
+    return list;
+}
+
 Arg* _obj_getProp(PikaObj* obj, char* name) {
     NativeProperty* prop = obj_getPtr(obj, "@p");
     PikaObj* class_obj = NULL;
@@ -601,7 +642,7 @@ PikaObj* newRootObj(char* name, NewFun newObjFun) {
 #if PIKA_POOL_ENABLE
     mem_pool_init();
 #endif
-#if __linux
+#ifdef __linux
     // set_disp_mode(STDIN_FILENO, 0);
 #endif
     PikaObj* newObj = newNormalObj(newObjFun);
@@ -1975,7 +2016,7 @@ void pikaGC_markDump(void) {
 #else
     PikaGC gc = {0};
     pika_platform_printf(
-        "\033[31m"
+        "\033[32m"
         "========= PIKA GC DUMP =========\r\n"
         "\033[0m");
     gc.onMarkObj = _pikaGC_markDumpHandler;

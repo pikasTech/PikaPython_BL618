@@ -25,11 +25,12 @@ PikaObj *pikaScriptInit(void){
     __platform_printf("configparser==v0.2.1\r\n");
     __platform_printf("json==v0.1.1\r\n");
     __platform_printf("modbus==v0.0.4\r\n");
+    __platform_printf("network==v0.1.2\r\n");
     __platform_printf("pika_cjson==v1.2.2\r\n");
-    __platform_printf("pika_libc==v1.0.1\r\n");
-    __platform_printf("pika_lvgl==v0.4.4\r\n");
+    __platform_printf("pika_lvgl==v0.5.0\r\n");
     __platform_printf("random==v0.1.1\r\n");
     __platform_printf("re==v0.1.1\r\n");
+    __platform_printf("socket==v0.1.4\r\n");
     __platform_printf("time==v0.1.3\r\n");
     __platform_printf("unittest==v0.1.2\r\n");
     __platform_printf("===========================================\r\n");
@@ -40,21 +41,15 @@ PikaObj *pikaScriptInit(void){
 #if PIKA_INIT_STRING_ENABLE
     obj_run(pikaMain,
             "import PikaStdLib\n"
-            "import random\n"
             "import PikaStdData\n"
-            "import configparser\n"
-            "import pika_cjson\n"
             "import PikaMath\n"
-            "import unittest\n"
-            "import re\n"
-            "import binascii\n"
-            "import modbus\n"
-            "import time\n"
-            "import pika_lvgl\n"
-            "import _thread\n"
+            "import binascii, re, unittest, configparser, _thread\n"
+            "import json, time, modbus, random\n"
+            "import lvgl\n"
             "import machine\n"
             "import example\n"
-            "import json\n"
+            "import bflb\n"
+            "import network, socket\n"
             "print('hello PikaPython!')\n"
             "\n");
 #else 

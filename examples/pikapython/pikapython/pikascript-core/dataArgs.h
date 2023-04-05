@@ -25,6 +25,10 @@
  * SOFTWARE.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _dataArgs__H
 #define _dataArgs__H
 #include "dataArg.h"
@@ -243,6 +247,9 @@ static inline Arg* pikaTuple_getArg(PikaTuple* self, int index) {
 }
 
 static inline size_t pikaTuple_getSize(PikaTuple* self) {
+    if (self == NULL) {
+        return 0;
+    }
     return pikaList_getSize((&((self)->super)));
 }
 
@@ -275,4 +282,8 @@ char* strsFormatList(Args* out_buffs, char* fmt, PikaList* list);
 char* args_cacheStr(Args* self, char* str);
 char* strsFormatArg(Args* out_buffs, char* fmt, Arg* arg);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
