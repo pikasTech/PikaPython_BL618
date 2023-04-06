@@ -24,6 +24,7 @@
 #include "PikaStdLib.h"
 #include "_modbus.h"
 #include "_network.h"
+#include "_requests.h"
 #include "_socket.h"
 #include "_thread.h"
 #include "_time.h"
@@ -103,6 +104,10 @@
 #include "_network.h"
 #include "TinyObj.h"
 #include "_network_WLAN.h"
+#include "TinyObj.h"
+#include "_requests.h"
+#include "TinyObj.h"
+#include "_requests_Response.h"
 #include "TinyObj.h"
 #include "_socket.h"
 #include "TinyObj.h"
@@ -305,6 +310,7 @@ PikaObj *New_PikaMain(Args *args){
     obj_newObj(self, "PikaStdLib", "PikaStdLib", New_PikaStdLib);
     obj_newObj(self, "_modbus", "_modbus", New__modbus);
     obj_newObj(self, "_network", "_network", New__network);
+    obj_newObj(self, "_requests", "_requests", New__requests);
     obj_newObj(self, "_socket", "_socket", New__socket);
     obj_newObj(self, "_thread", "_thread", New__thread);
     obj_newObj(self, "_time", "_time", New__time);
@@ -4964,6 +4970,146 @@ PikaObj *New__network_WLAN(Args *args){
 
 Arg *_network_WLAN(PikaObj *self){
     return obj_newObjInPackage(New__network_WLAN);
+}
+#endif
+
+#ifndef PIKA_MODULE__REQUESTS_DISABLE
+void _requests_ResponseMethod(PikaObj *self, Args *args){
+    Arg* res = _requests_Response(self);
+    method_returnArg(args, res);
+}
+method_typedef(
+    _requests_Response,
+    "Response", ""
+);
+
+class_def(_requests){
+    __BEFORE_MOETHOD_DEF
+    constructor_def(_requests_Response, 468593716),
+};
+class_inhert(_requests, TinyObj);
+
+PikaObj *New__requests(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, _requests);
+    return self;
+}
+#endif
+
+#ifndef PIKA_MODULE__REQUESTS_DISABLE
+void _requests_Response___del__Method(PikaObj *self, Args *args){
+    _requests_Response___del__(self);
+}
+method_typedef(
+    _requests_Response___del__,
+    "__del__", ""
+);
+
+void _requests_Response___init__Method(PikaObj *self, Args *args){
+    _requests_Response___init__(self);
+}
+method_typedef(
+    _requests_Response___init__,
+    "__init__", ""
+);
+
+void _requests_Response_header_writeMethod(PikaObj *self, Args *args){
+    char* header = args_getStr(args, "header");
+    char* value = args_getStr(args, "value");
+    int res = _requests_Response_header_write(self, header, value);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _requests_Response_header_write,
+    "header_write", "header,value"
+);
+
+void _requests_Response_jsonMethod(PikaObj *self, Args *args){
+    PikaObj* res = _requests_Response_json(self);
+    method_returnObj(args, res);
+}
+method_typedef(
+    _requests_Response_json,
+    "json", ""
+);
+
+void _requests_Response_proto_writeMethod(PikaObj *self, Args *args){
+    char* proto = args_getStr(args, "proto");
+    int res = _requests_Response_proto_write(self, proto);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _requests_Response_proto_write,
+    "proto_write", "proto"
+);
+
+void _requests_Response_requestMethod(PikaObj *self, Args *args){
+    char* method = args_getStr(args, "method");
+    char* url = args_getStr(args, "url");
+    pika_float timeout = args_getFloat(args, "timeout");
+    char* data = args_getStr(args, "data");
+    int res = _requests_Response_request(self, method, url, timeout, data);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _requests_Response_request,
+    "request", "method,url,timeout,data"
+);
+
+void _requests_Response_request_delMethod(PikaObj *self, Args *args){
+    PikaObj* res = _requests_Response_request_del(self);
+    method_returnObj(args, res);
+}
+method_typedef(
+    _requests_Response_request_del,
+    "request_del", ""
+);
+
+void _requests_Response_request_initMethod(PikaObj *self, Args *args){
+    char* method = args_getStr(args, "method");
+    int res = _requests_Response_request_init(self, method);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _requests_Response_request_init,
+    "request_init", "method"
+);
+
+void _requests_Response_urlencode_writeMethod(PikaObj *self, Args *args){
+    char* s1 = args_getStr(args, "s1");
+    char* s2 = args_getStr(args, "s2");
+    char* start = args_getStr(args, "start");
+    char* connect = args_getStr(args, "connect");
+    int res = _requests_Response_urlencode_write(self, s1, s2, start, connect);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _requests_Response_urlencode_write,
+    "urlencode_write", "s1,s2,start,connect"
+);
+
+class_def(_requests_Response){
+    __BEFORE_MOETHOD_DEF
+    method_def(_requests_Response_request_init, 671797089),
+    method_def(_requests_Response___init__, 904762485),
+    method_def(_requests_Response_request, 1057384718),
+    method_def(_requests_Response_request_del, 1061555938),
+    method_def(_requests_Response_header_write, 1163734040),
+    method_def(_requests_Response_urlencode_write, 1444268304),
+    method_def(_requests_Response_proto_write, 1731939075),
+    method_def(_requests_Response___del__, 2038499702),
+    method_def(_requests_Response_json, 2090411935),
+};
+class_inhert(_requests_Response, TinyObj);
+
+PikaObj *New__requests_Response(Args *args){
+    PikaObj *self = New_TinyObj(args);
+    obj_setClass(self, _requests_Response);
+    return self;
+}
+
+Arg *_requests_Response(PikaObj *self){
+    return obj_newObjInPackage(New__requests_Response);
 }
 #endif
 

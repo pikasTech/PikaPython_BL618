@@ -7,6 +7,10 @@
 #include "./pikapython/pikascript-lib/PikaStdDevice/pika_hal.h"
 #include "pikaScript.h"
 
+#include <lwip/tcpip.h>
+#include <lwip/sockets.h>
+#include <lwip/netdb.h>
+
 // 板级驱动
 #include "bflb_adc.h"
 #include "bflb_cam.h"
@@ -51,8 +55,8 @@
 
 /* bsp config for PikaPython */
 #define USING_USB_CDC 1
-#define USING_LVGL 0
-#define USING_TOUCH 0
+#define USING_LVGL 1
+#define USING_TOUCH 1
 #define USING_APP_XIP 1
 
 #define USING_KEY_ERAISE 0
@@ -64,7 +68,9 @@
 #endif
 
 #if !USING_LVGL && USING_TOUCH
-#error "Using touch and not using lvgl at the same time is not supported"
+#warning "Using touch and not using lvgl at the same time is not supported"
+#undef USING_TOUCH
+#define USING_TOUCH 0
 #endif
 
 #if defined(BL616)
@@ -82,6 +88,7 @@ struct bflb_device_s* uartx = NULL;
 volatile FILE g_pika_app_flash_file = {0};
 volatile int g_pika_app_flash_pos = 0;
 static volatile int g_usb_cdc_init = 0;
+int wifi_start_firmware_task(void);
 #define _PIKA_APP_FLASH_ADDR 0x200000   // 2M
 
 #if USING_APP_XIP
@@ -241,9 +248,11 @@ static void init_lvgl(void) {
         .coord_x = LCD_W,
         .coord_y = LCD_H,
     };
-    touch_init(&touch_max_point);
+    int ret = touch_init(&touch_max_point);
     touch_coord_t touch_coord;
-    int ret = touch_read(&point_num, &touch_coord, 1);
+    if (ret == 0){
+        ret = touch_read(&point_num, &touch_coord, 1);
+    }
     printf("touch_read ret:%d\r\n", ret);
     /* check touch is connected */
     if(ret == 0){
@@ -255,21 +264,20 @@ static void init_lvgl(void) {
 }
 
 static void create_tasks(void) {
-#if PIKA_FREERTOS_ENABLE
-    xTaskCreate(consumer_task, (char *)"consumer_task", 8 * 1024, NULL, 3, NULL);
+#if 1
+    xTaskCreate(consumer_task, (char *)"consumer_task", 4 * 1024, NULL, 3, NULL);
+#endif
 #if USING_KEY_ERAISE
     xTaskCreate(_erase_app_task, (char *)"erase_app_task", 8192, NULL,
                 configMAX_PRIORITIES - 1, NULL);
 #endif
-#if USING_USB_CDC
-    xTaskCreate(usb_cdc_fflush_task, (char *)"usb_cdc_fflush_task", 1024, NULL,
+#if USING_USB_CDC && 1
+    xTaskCreate(usb_cdc_fflush_task, (char *)"usb_cdc_fflush_task", 128, NULL,
                 1, NULL);
 #endif
-#if USING_LVGL
-    xTaskCreate(lvgl_task, (char *)"lvgl_task", 8 * 1024, NULL,
+#if USING_LVGL && 1
+    xTaskCreate(lvgl_task, (char *)"lvgl_task", 4 * 1024, NULL,
                 configMAX_PRIORITIES - 16, NULL);
-#endif
-    vTaskStartScheduler();
 #endif
 }
 
@@ -283,6 +291,10 @@ int main(void) {
 #endif
 
     create_tasks();
+
+    // wifi_start_firmware_task();
+
+    vTaskStartScheduler();
 
     while (1) {
         /* delay */

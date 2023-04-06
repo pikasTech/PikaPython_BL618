@@ -7,5 +7,5 @@ import lvgl
 import machine
 import example
 import bflb
-import network, socket
+import network, socket, requests
 print('hello PikaPython!')

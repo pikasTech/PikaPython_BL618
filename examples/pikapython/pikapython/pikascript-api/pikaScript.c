@@ -30,6 +30,7 @@ PikaObj *pikaScriptInit(void){
     __platform_printf("pika_lvgl==v0.5.0\r\n");
     __platform_printf("random==v0.1.1\r\n");
     __platform_printf("re==v0.1.1\r\n");
+    __platform_printf("requests==v1.0.0\r\n");
     __platform_printf("socket==v0.1.4\r\n");
     __platform_printf("time==v0.1.3\r\n");
     __platform_printf("unittest==v0.1.2\r\n");
@@ -49,7 +50,7 @@ PikaObj *pikaScriptInit(void){
             "import machine\n"
             "import example\n"
             "import bflb\n"
-            "import network, socket\n"
+            "import network, socket, requests\n"
             "print('hello PikaPython!')\n"
             "\n");
 #else 

@@ -5173,20 +5173,24 @@ static int gsl2038_i2c_write_byte(uint16_t register_addr, uint8_t *data_buf, uin
     msg[1].buffer = data_buf;
     msg[1].length = len;
 
-    bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
-    return 0;
+    return bflb_i2c_transfer(touch_gsl2038_i2c, msg, 2);
 }
 
-static void gsl2038_reset()
+static int gsl2038_reset()
 {
     uint8_t reg[] = { GSL2038_STATUS_REG, 0xe4, 0xbc, 0xbd, 0xbe, 0xbf };
     uint8_t data[] = { 0x88, 0x04, 0x00, 0x00, 0x00, 0x00 };
 
     for (size_t i = 0; i < sizeof(reg) / sizeof(reg[0]); i++) {
-        gsl2038_i2c_write_byte(reg[i], &data[i], 1);
+        int ret = gsl2038_i2c_write_byte(reg[i], &data[i], 1);
         bflb_mtimer_delay_ms(2);
+        if (ret <0 ){
+            printf("Touch reset fail.\r\n");
+            return -1;
+        }
     }
     printf("Touch reset success.\r\n");
+    return 0;
 }
 
 static void gsl2038_loadfw()
@@ -5208,7 +5212,9 @@ int gsl2038_i2c_init(touch_coord_t *max_value)
 {
     gsl2038_i2c_peripheral_init();
 
-    gsl2038_reset();
+    if(0 != gsl2038_reset()){
+        return -1;
+    }
     gsl2038_loadfw();
     gsl2038_reset();
     gsl2038_startchip();

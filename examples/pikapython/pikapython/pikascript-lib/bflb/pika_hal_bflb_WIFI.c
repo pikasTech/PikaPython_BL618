@@ -12,7 +12,7 @@
 #include "bl616_glb.h"
 #include "pika_hal_bflb_common.h"
 
-#define WIFI_STACK_SIZE  (1024 * 4)
+#define WIFI_STACK_SIZE  (1024 * 2)
 #define TASK_PRIORITY_FW (16)
 
 static TaskHandle_t wifi_fw_task;
@@ -75,8 +75,8 @@ void wifi_event_handler(uint32_t code)
 
 int wifi_start_firmware_task(void)
 {
-    tcpip_init(NULL, NULL);
     /* enable wifi clock */
+    tcpip_init(NULL, NULL);
 
     GLB_PER_Clock_UnGate(GLB_AHB_CLOCK_IP_WIFI_PHY | GLB_AHB_CLOCK_IP_WIFI_MAC_PHY | GLB_AHB_CLOCK_IP_WIFI_PLATFORM);
     GLB_AHB_MCU_Software_Reset(GLB_AHB_MCU_SW_WIFI);

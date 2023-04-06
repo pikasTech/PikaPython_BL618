@@ -293,11 +293,12 @@
         0: Does not care about lcd hard reset
         1: use gpio to reset the lcd
     */
-    #define LCD_RESET_EN 1
+    // #define LCD_RESET_EN 1
 
+    #define PIXEL_DEVIDE 1
     /* LCD width and height */
-    #define ST7796_SPI_W 320
-    #define ST7796_SPI_H 480
+    #define ST7796_SPI_W (320 / PIXEL_DEVIDE)
+    #define ST7796_SPI_H (320 / PIXEL_DEVIDE)
 
     /* The offset of the area can be displayed */
     #define ST7796_SPI_OFFSET_X 0
@@ -446,7 +447,7 @@
     #define LCD_SPI_HARD_4_DMA_NAME "dma0_ch3"
 
     /* The maximum pixel cnt to be transferred affects the number of LLI memory pools */
-    #define LCD_SPI_HARD_4_PIXEL_CNT_MAX (800 * 640)
+    #define LCD_SPI_HARD_4_PIXEL_CNT_MAX ((320 / PIXEL_DEVIDE) * (320 / PIXEL_DEVIDE))
 
     /* spi pin, hardware controlled */
     #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_9
