@@ -70,6 +70,13 @@ int pika_GIL_ENTER(void) {
     if (!g_pikaGIL.is_first_lock) {
         g_pikaGIL.is_first_lock = 1;
     }
+    g_pikaGIL.lock_times++;
+    // pika_assert(g_pikaGIL.look_times == 1);
+    if (g_pikaGIL.lock_times != 1) {
+        pika_debug("ENTER: pika_GIL lock_times:%d", g_pikaGIL.lock_times);
+        return -1;
+    }
+    pika_assert(g_pikaGIL.lock_times == 1);
     return ret;
 }
 
@@ -77,7 +84,15 @@ int pika_GIL_EXIT(void) {
     if (!g_pikaGIL.is_init) {
         return 0;
     }
+    if (!g_pikaGIL.is_first_lock) {
+        return 0;
+    }
     // pika_debug("pika_GIL_EXIT");
+    g_pikaGIL.lock_times--;
+    if (g_pikaGIL.lock_times != 0) {
+        pika_debug("EXIT: pika_GIL lock_times:%d", g_pikaGIL.lock_times);
+        return -1;
+    }
     return pika_platform_thread_mutex_unlock(&g_pikaGIL);
 }
 
@@ -247,7 +262,7 @@ PIKA_RES __eventListener_popEvent(PikaEventListener** lisener_p,
 #endif
 }
 
-void _VMEvent_pickupEvent(void) {
+void __VMEvent_pickupEvent(char* info) {
 #if !PIKA_EVENT_ENABLE
     pika_platform_printf("PIKA_EVENT_ENABLE is not enable\r\n");
     pika_platform_panic_handle();
@@ -263,6 +278,7 @@ void _VMEvent_pickupEvent(void) {
     if (PIKA_RES_OK == __eventListener_popEvent(&event_lisener, &event_id,
                                                 &event_data, &head)) {
         g_PikaVMSignal.event_pickup_cnt++;
+        pika_debug("pickup_info: %s", info);
         pika_debug("pickup_cnt: %d", g_PikaVMSignal.event_pickup_cnt);
         Arg* res =
             __eventListener_runEvent(event_lisener, event_id, event_data);
@@ -2627,8 +2643,8 @@ static Arg* VM_instruction_handler_OPT(PikaObj* self,
     /* init operator info */
     int ret = operatorInfo_init(&op, self, vm, data, arg_ret_reg);
     if (0 != ret) {
-        pika_platform_printf("SyntaxError: invalid syntax\r\n");
-        obj_setErrorCode(self, PIKA_RES_ERR_SYNTAX_ERROR);
+        pika_platform_printf(PIKA_ERR_STRING_SYNTAX_ERROR);
+        VMState_setErrorCode(vm, PIKA_RES_ERR_SYNTAX_ERROR);
         return NULL;
     }
     switch (data[0]) {
@@ -3450,7 +3466,7 @@ static VMParameters* _pikaVM_runPyLines(PikaObj* self, char* py_lines) {
     /* generate byte code */
     byteCodeFrame_init(bytecode_frame_p);
     if (PIKA_RES_OK != pika_lines2Bytes(bytecode_frame_p, py_lines)) {
-        pika_platform_printf("Error: Syntax error.\r\n");
+        pika_platform_printf(PIKA_ERR_STRING_SYNTAX_ERROR);
         globals = NULL;
         goto exit;
     }
@@ -4112,7 +4128,9 @@ PikaObj* pikaVM_runFile(PikaObj* self, char* file_name) {
 
 void _pikaVM_yield(void) {
 #if PIKA_EVENT_ENABLE
-    _VMEvent_pickupEvent();
+    if(!g_PikaVMSignal.event_thread_inited) {
+        _VMEvent_pickupEvent();
+    }
 #endif
     pika_GIL_EXIT();
     pika_GIL_ENTER();
