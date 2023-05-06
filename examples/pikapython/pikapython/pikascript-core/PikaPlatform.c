@@ -178,7 +178,10 @@ static int _no_buff_vprintf(char* fmt, va_list args) {
         if (*fmt == '%') {
             ++fmt;
             if (*fmt == 's') {
-                const char* str = va_arg(args, const char*);
+                char* str = va_arg(args, char*);
+                if (str == NULL) {
+                    str = "(null)";
+                }
                 int len = strlen(str);
                 written += len;
                 for (int i = 0; i < len; i++) {
@@ -673,4 +676,8 @@ PIKA_WEAK void pika_platform_reboot(void) {
 
 PIKA_WEAK void pika_platform_clear(void) {
     WEAK_FUNCTION_NEED_OVERRIDE_ERROR();
+}
+
+PIKA_WEAK void pika_platform_abort_handler(void) {
+    return;
 }

@@ -31,12 +31,15 @@ char* PikaStdDevice_UART_read(PikaObj *self, int length);
 Arg* PikaStdDevice_UART_readBytes(PikaObj *self, int length);
 void PikaStdDevice_UART_setBaudRate(PikaObj *self, int baudRate);
 void PikaStdDevice_UART_setCallBack(PikaObj *self, Arg* eventCallBack, int filter);
+void PikaStdDevice_UART_setDataBits(PikaObj *self, int dataBits);
 void PikaStdDevice_UART_setFlowControl(PikaObj *self, int flowControl);
 void PikaStdDevice_UART_setId(PikaObj *self, int id);
+void PikaStdDevice_UART_setParity(PikaObj *self, int parity);
 void PikaStdDevice_UART_setPinCTS(PikaObj *self, char* pin);
 void PikaStdDevice_UART_setPinRTS(PikaObj *self, char* pin);
 void PikaStdDevice_UART_setPinRX(PikaObj *self, char* pin);
 void PikaStdDevice_UART_setPinTX(PikaObj *self, char* pin);
+void PikaStdDevice_UART_setStopBits(PikaObj *self, int stopBits);
 void PikaStdDevice_UART_write(PikaObj *self, char* data);
 void PikaStdDevice_UART_writeBytes(PikaObj *self, uint8_t* data, int length);
 

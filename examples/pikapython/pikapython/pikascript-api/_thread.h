@@ -17,6 +17,7 @@
 
 PikaObj *New__thread(Args *args);
 
+int _thread_stack_size(PikaObj *self, PikaTuple* size);
 void _thread_start_new_thread(PikaObj *self, Arg* function, Arg* args_);
 
 #endif

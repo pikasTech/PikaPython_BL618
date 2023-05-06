@@ -1570,12 +1570,13 @@ method_typedef(
 );
 
 void PikaStdData_List_popMethod(PikaObj *self, Args *args){
-    Arg* res = PikaStdData_List_pop(self);
+    PikaTuple* index = args_getTuple(args, "index");
+    Arg* res = PikaStdData_List_pop(self, index);
     method_returnArg(args, res);
 }
 method_typedef(
     PikaStdData_List_pop,
-    "pop", ""
+    "pop", "*index"
 );
 
 void PikaStdData_List_removeMethod(PikaObj *self, Args *args){
@@ -1717,6 +1718,16 @@ method_typedef(
     "endswith", "suffix"
 );
 
+void PikaStdData_String_findMethod(PikaObj *self, Args *args){
+    char* sub = args_getStr(args, "sub");
+    int res = PikaStdData_String_find(self, sub);
+    method_returnInt(args, res);
+}
+method_typedef(
+    PikaStdData_String_find,
+    "find", "sub"
+);
+
 void PikaStdData_String_formatMethod(PikaObj *self, Args *args){
     PikaTuple* vars = args_getTuple(args, "vars");
     char* res = PikaStdData_String_format(self, vars);
@@ -1812,13 +1823,13 @@ method_typedef(
 );
 
 void PikaStdData_String_splitMethod(PikaObj *self, Args *args){
-    char* s = args_getStr(args, "s");
+    PikaTuple* s = args_getTuple(args, "s");
     PikaObj* res = PikaStdData_String_split(self, s);
     method_returnObj(args, res);
 }
 method_typedef(
     PikaStdData_String_split,
-    "split", "s"
+    "split", "*s"
 );
 
 void PikaStdData_String_startswithMethod(PikaObj *self, Args *args){
@@ -1863,6 +1874,7 @@ class_def(PikaStdData_String){
     method_def(PikaStdData_String___len__, 2047989248),
     method_def(PikaStdData_String___str__, 2056834106),
     method_def(PikaStdData_String_encode, 2071380659),
+    method_def(PikaStdData_String_find, 2090257254),
     method_def(PikaStdData_String_join, 2090407381),
     method_def(PikaStdData_String_format, 2112238766),
 };
@@ -3582,6 +3594,15 @@ method_typedef(
     "setCallBack", "eventCallBack,filter"
 );
 
+void PikaStdDevice_UART_setDataBitsMethod(PikaObj *self, Args *args){
+    int dataBits = args_getInt(args, "dataBits");
+    PikaStdDevice_UART_setDataBits(self, dataBits);
+}
+method_typedef(
+    PikaStdDevice_UART_setDataBits,
+    "setDataBits", "dataBits"
+);
+
 void PikaStdDevice_UART_setFlowControlMethod(PikaObj *self, Args *args){
     int flowControl = args_getInt(args, "flowControl");
     PikaStdDevice_UART_setFlowControl(self, flowControl);
@@ -3598,6 +3619,15 @@ void PikaStdDevice_UART_setIdMethod(PikaObj *self, Args *args){
 method_typedef(
     PikaStdDevice_UART_setId,
     "setId", "id"
+);
+
+void PikaStdDevice_UART_setParityMethod(PikaObj *self, Args *args){
+    int parity = args_getInt(args, "parity");
+    PikaStdDevice_UART_setParity(self, parity);
+}
+method_typedef(
+    PikaStdDevice_UART_setParity,
+    "setParity", "parity"
 );
 
 void PikaStdDevice_UART_setPinCTSMethod(PikaObj *self, Args *args){
@@ -3636,6 +3666,15 @@ method_typedef(
     "setPinTX", "pin"
 );
 
+void PikaStdDevice_UART_setStopBitsMethod(PikaObj *self, Args *args){
+    int stopBits = args_getInt(args, "stopBits");
+    PikaStdDevice_UART_setStopBits(self, stopBits);
+}
+method_typedef(
+    PikaStdDevice_UART_setStopBits,
+    "setStopBits", "stopBits"
+);
+
 void PikaStdDevice_UART_writeMethod(PikaObj *self, Args *args){
     char* data = args_getStr(args, "data");
     PikaStdDevice_UART_write(self, data);
@@ -3664,6 +3703,7 @@ class_def(PikaStdDevice_UART){
     method_def(PikaStdDevice_UART_write, 279491920),
     method_def(PikaStdDevice_UART_disable, 314893497),
     method_def(PikaStdDevice_UART_platformDisable, 326843198),
+    method_def(PikaStdDevice_UART_setParity, 521674442),
     method_def(PikaStdDevice_UART_setPinCTS, 530975586),
     method_def(PikaStdDevice_UART_setPinRTS, 530991921),
     method_def(PikaStdDevice_UART_readBytes, 545481704),
@@ -3672,7 +3712,9 @@ class_def(PikaStdDevice_UART){
     method_def(PikaStdDevice_UART_writeBytes, 787295575),
     method_def(PikaStdDevice_UART_platformEnable, 835227025),
     method_def(PikaStdDevice_UART___init__, 904762485),
+    method_def(PikaStdDevice_UART_setDataBits, 914549853),
     method_def(PikaStdDevice_UART_setCallBack, 945732542),
+    method_def(PikaStdDevice_UART_setStopBits, 978750537),
     method_def(PikaStdDevice_UART_platformWrite, 1348314773),
     method_def(PikaStdDevice_UART_setFlowControl, 1507149322),
     method_def(PikaStdDevice_UART_setBaudRate, 1620269241),
@@ -3898,6 +3940,16 @@ method_typedef(
     "__setitem__", "obj,key,val"
 );
 
+void PikaStdLib_SysObj_absMethod(PikaObj *self, Args *args){
+    Arg* val = args_getArg(args, "val");
+    Arg* res = PikaStdLib_SysObj_abs(self, val);
+    method_returnArg(args, res);
+}
+method_typedef(
+    PikaStdLib_SysObj_abs,
+    "abs", "val"
+);
+
 void PikaStdLib_SysObj_boolMethod(PikaObj *self, Args *args){
     Arg* arg = args_getArg(args, "arg");
     PIKA_BOOL res = PikaStdLib_SysObj_bool(self, arg);
@@ -4114,6 +4166,26 @@ method_typedef(
     "list", "*val"
 );
 
+void PikaStdLib_SysObj_maxMethod(PikaObj *self, Args *args){
+    PikaTuple* val = args_getTuple(args, "val");
+    Arg* res = PikaStdLib_SysObj_max(self, val);
+    method_returnArg(args, res);
+}
+method_typedef(
+    PikaStdLib_SysObj_max,
+    "max", "*val"
+);
+
+void PikaStdLib_SysObj_minMethod(PikaObj *self, Args *args){
+    PikaTuple* val = args_getTuple(args, "val");
+    Arg* res = PikaStdLib_SysObj_min(self, val);
+    method_returnArg(args, res);
+}
+method_typedef(
+    PikaStdLib_SysObj_min,
+    "min", "*val"
+);
+
 void PikaStdLib_SysObj_openMethod(PikaObj *self, Args *args){
     char* path = args_getStr(args, "path");
     char* mode = args_getStr(args, "mode");
@@ -4210,6 +4282,9 @@ class_def(PikaStdLib_SysObj){
     method_def(PikaStdLib_SysObj_id, 5863474),
 #endif
 #if !PIKA_NANO_ENABLE
+    method_def(PikaStdLib_SysObj_abs, 193485979),
+#endif
+#if !PIKA_NANO_ENABLE
     method_def(PikaStdLib_SysObj_chr, 193488354),
 #endif
 #if !PIKA_NANO_ENABLE
@@ -4220,6 +4295,12 @@ class_def(PikaStdLib_SysObj){
 #endif
     method_def(PikaStdLib_SysObj_int, 193495088),
     method_def(PikaStdLib_SysObj_len, 193498052),
+#if !PIKA_NANO_ENABLE
+    method_def(PikaStdLib_SysObj_max, 193499019),
+#endif
+#if !PIKA_NANO_ENABLE
+    method_def(PikaStdLib_SysObj_min, 193499273),
+#endif
 #if !PIKA_NANO_ENABLE
     method_def(PikaStdLib_SysObj_ord, 193501738),
 #endif
@@ -5254,6 +5335,16 @@ Arg *_socket_socket(PikaObj *self){
 #endif
 
 #ifndef PIKA_MODULE__THREAD_DISABLE
+void _thread_stack_sizeMethod(PikaObj *self, Args *args){
+    PikaTuple* size = args_getTuple(args, "size");
+    int res = _thread_stack_size(self, size);
+    method_returnInt(args, res);
+}
+method_typedef(
+    _thread_stack_size,
+    "stack_size", "*size"
+);
+
 void _thread_start_new_threadMethod(PikaObj *self, Args *args){
     Arg* function = args_getArg(args, "function");
     Arg* args_ = args_getArg(args, "args_");
@@ -5266,6 +5357,7 @@ method_typedef(
 
 class_def(_thread){
     __BEFORE_MOETHOD_DEF
+    method_def(_thread_stack_size, 420962037),
     method_def(_thread_start_new_thread, 1487466483),
 };
 class_inhert(_thread, TinyObj);

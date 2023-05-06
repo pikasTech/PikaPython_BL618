@@ -86,16 +86,16 @@ Arg* PikaStdLib_SysObj_type(PikaObj* self, Arg* arg) {
 pika_float PikaStdLib_SysObj_float(PikaObj* self, Arg* arg) {
     ArgType type = arg_getType(arg);
     if (ARG_TYPE_INT == type) {
-        return (float)arg_getInt(arg);
+        return (pika_float)arg_getInt(arg);
     }
     if (ARG_TYPE_FLOAT == type) {
-        return (float)arg_getFloat(arg);
+        return (pika_float)arg_getFloat(arg);
     }
     if (ARG_TYPE_STRING == type) {
         return strtod(arg_getStr(arg), NULL);
     }
     if (ARG_TYPE_BOOL == type) {
-        return (float)arg_getBool(arg);
+        return (pika_float)arg_getBool(arg);
     }
     obj_setSysOut(self, "[error] convert to pika_float type failed.");
     obj_setErrorCode(self, 1);
@@ -109,11 +109,11 @@ PIKA_RES _transeInt(Arg* arg, int base, int64_t* res) {
         return PIKA_RES_OK;
     }
     if (ARG_TYPE_BOOL == type) {
-        *res = (int)arg_getBool(arg);
+        *res = (int64_t)arg_getBool(arg);
         return PIKA_RES_OK;
     }
     if (ARG_TYPE_FLOAT == type) {
-        *res = (int)arg_getFloat(arg);
+        *res = (int64_t)arg_getFloat(arg);
         return PIKA_RES_OK;
     }
     if (ARG_TYPE_STRING == type) {
@@ -134,7 +134,7 @@ PIKA_RES _transeInt(Arg* arg, int base, int64_t* res) {
 
 int PikaStdLib_SysObj_int(PikaObj* self, Arg* arg, PikaTuple* base) {
     int64_t res = 0;
-    int iBase = 10;
+    int64_t iBase = 10;
     if (pikaTuple_getSize(base) > 0) {
         if (arg_getType(arg) != ARG_TYPE_STRING &&
             arg_getType(arg) != ARG_TYPE_BYTES) {
@@ -144,7 +144,7 @@ int PikaStdLib_SysObj_int(PikaObj* self, Arg* arg, PikaTuple* base) {
             obj_setErrorCode(self, 1);
             return _PIKA_INT_ERR;
         }
-        iBase = (int)pikaTuple_getInt(base, 0);
+        iBase = (int64_t)pikaTuple_getInt(base, 0);
     }
     if (_transeInt(arg, iBase, &res) == PIKA_RES_OK) {
         return res;
@@ -685,4 +685,113 @@ void PikaStdLib_SysObj_clear(PikaObj* self) {
 
 void PikaStdLib_SysObj_gcdump(PikaObj* self) {
     pikaGC_markDump();
+}
+
+Arg* PikaStdLib_SysObj_abs(PikaObj* self, Arg* val) {
+    ArgType type = arg_getType(val);
+    if (type == ARG_TYPE_INT) {
+        int64_t v = arg_getInt(val);
+        if (v < 0) {
+            v = -v;
+        }
+        return arg_newInt(v);
+    }
+    if (type == ARG_TYPE_FLOAT) {
+        pika_float v = arg_getFloat(val);
+        if (v < 0) {
+            v = -v;
+        }
+        return arg_newFloat(v);
+    }
+    obj_setSysOut(self, "TypeError: bad operand type for abs()");
+    obj_setErrorCode(self, PIKA_RES_ERR_INVALID_PARAM);
+    return NULL;
+}
+
+PikaObj* New_PikaStdData_Tuple(Args* args);
+/* clang-format off */
+PIKA_PYTHON(
+@res_max = @list[0]
+for @item in @list:
+    if @item > @res_max:
+        @res_max = @item
+)
+/* clang-format on */
+const uint8_t bc_max[] = {
+    0x4c, 0x00, 0x00, 0x00, /* instruct array size */
+    0x10, 0x81, 0x01, 0x00, 0x10, 0x05, 0x07, 0x00, 0x00, 0x1d, 0x00, 0x00,
+    0x00, 0x04, 0x09, 0x00, 0x10, 0x81, 0x01, 0x00, 0x00, 0x02, 0x12, 0x00,
+    0x00, 0x04, 0x17, 0x00, 0x00, 0x82, 0x1b, 0x00, 0x00, 0x04, 0x28, 0x00,
+    0x00, 0x0d, 0x28, 0x00, 0x00, 0x07, 0x2e, 0x00, 0x11, 0x81, 0x28, 0x00,
+    0x11, 0x01, 0x09, 0x00, 0x01, 0x08, 0x30, 0x00, 0x01, 0x07, 0x32, 0x00,
+    0x02, 0x81, 0x28, 0x00, 0x02, 0x04, 0x09, 0x00, 0x00, 0x86, 0x34, 0x00,
+    0x00, 0x8c, 0x17, 0x00, /* instruct array */
+    0x37, 0x00, 0x00, 0x00, /* const pool size */
+    0x00, 0x40, 0x6c, 0x69, 0x73, 0x74, 0x00, 0x30, 0x00, 0x40, 0x72, 0x65,
+    0x73, 0x5f, 0x6d, 0x61, 0x78, 0x00, 0x69, 0x74, 0x65, 0x72, 0x00, 0x24,
+    0x6c, 0x30, 0x00, 0x24, 0x6c, 0x30, 0x2e, 0x5f, 0x5f, 0x6e, 0x65, 0x78,
+    0x74, 0x5f, 0x5f, 0x00, 0x40, 0x69, 0x74, 0x65, 0x6d, 0x00, 0x32, 0x00,
+    0x3e, 0x00, 0x31, 0x00, 0x2d, 0x31, 0x00, /* const pool */
+};
+
+/* clang-format off */
+PIKA_PYTHON(
+@res_max = @list[0]
+for @item in @list:
+    if @item < @res_max:
+        @res_max = @item
+
+)
+/* clang-format on */
+const uint8_t bc_min[] = {
+    0x4c, 0x00, 0x00, 0x00, /* instruct array size */
+    0x10, 0x81, 0x01, 0x00, 0x10, 0x05, 0x07, 0x00, 0x00, 0x1d, 0x00, 0x00,
+    0x00, 0x04, 0x09, 0x00, 0x10, 0x81, 0x01, 0x00, 0x00, 0x02, 0x12, 0x00,
+    0x00, 0x04, 0x17, 0x00, 0x00, 0x82, 0x1b, 0x00, 0x00, 0x04, 0x28, 0x00,
+    0x00, 0x0d, 0x28, 0x00, 0x00, 0x07, 0x2e, 0x00, 0x11, 0x81, 0x28, 0x00,
+    0x11, 0x01, 0x09, 0x00, 0x01, 0x08, 0x30, 0x00, 0x01, 0x07, 0x32, 0x00,
+    0x02, 0x81, 0x28, 0x00, 0x02, 0x04, 0x09, 0x00, 0x00, 0x86, 0x34, 0x00,
+    0x00, 0x8c, 0x17, 0x00, /* instruct array */
+    0x37, 0x00, 0x00, 0x00, /* const pool size */
+    0x00, 0x40, 0x6c, 0x69, 0x73, 0x74, 0x00, 0x30, 0x00, 0x40, 0x72, 0x65,
+    0x73, 0x5f, 0x6d, 0x61, 0x78, 0x00, 0x69, 0x74, 0x65, 0x72, 0x00, 0x24,
+    0x6c, 0x30, 0x00, 0x24, 0x6c, 0x30, 0x2e, 0x5f, 0x5f, 0x6e, 0x65, 0x78,
+    0x74, 0x5f, 0x5f, 0x00, 0x40, 0x69, 0x74, 0x65, 0x6d, 0x00, 0x32, 0x00,
+    0x3c, 0x00, 0x31, 0x00, 0x2d, 0x31, 0x00, /* const pool */
+};
+
+Arg* _max_min(PikaObj* self, PikaTuple* val, uint8_t* bc) {
+    int size = pikaTuple_getSize(val);
+    if (size == 0) {
+        obj_setSysOut(self, "TypeError: max expected 1 arguments, got 0");
+        obj_setErrorCode(self, PIKA_RES_ERR_INVALID_PARAM);
+        return NULL;
+    }
+    if (size == 1) {
+        ArgType type = arg_getType(pikaTuple_getArg(val, 0));
+        if ((!argType_isObject(type) && (type != ARG_TYPE_STRING) &&
+             (type != ARG_TYPE_BYTES))) {
+            obj_setSysOut(self, "TypeError: object is not iterable");
+            obj_setErrorCode(self, PIKA_RES_ERR_INVALID_PARAM);
+            return NULL;
+        }
+        obj_setArg(self, "@list", pikaTuple_getArg(val, 0));
+        return pikaVM_runByteCodeReturn(self, (uint8_t*)bc, "@res_max");
+    }
+    PikaObj* oTuple = newNormalObj(New_PikaStdData_Tuple);
+    obj_setPtr(oTuple, "list", val);
+    obj_setInt(oTuple, "needfree", 0);
+    Arg* aTuple = arg_newObj(oTuple);
+    obj_setArg(self, "@list", aTuple);
+    Arg* aRet = pikaVM_runByteCodeReturn(self, (uint8_t*)bc, "@res_max");
+    arg_deinit(aTuple);
+    return aRet;
+}
+
+Arg* PikaStdLib_SysObj_max(PikaObj* self, PikaTuple* val) {
+    return _max_min(self, val, (uint8_t*)bc_max);
+}
+
+Arg* PikaStdLib_SysObj_min(PikaObj* self, PikaTuple* val) {
+    return _max_min(self, val, (uint8_t*)bc_min);
 }

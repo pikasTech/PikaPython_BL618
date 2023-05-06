@@ -71,6 +71,8 @@ int strPathGetFolder(char* input, char* output);
 int strPathGetFileName(char* input, char* output);
 int strGetIndent(char* string);
 int strIsBlank(char* string);
+int strOnly(char* string, char ch);
+int _strCountSign(char* strIn, char sign, PIKA_BOOL bracketDepth0);
 
 #endif
 #ifdef __cplusplus

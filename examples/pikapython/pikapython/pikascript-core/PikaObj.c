@@ -37,6 +37,11 @@
 #include "dataQueue.h"
 #include "dataString.h"
 #include "dataStrs.h"
+#if __linux
+#include "signal.h"
+#include "termios.h"
+#include "unistd.h"
+#endif
 
 extern volatile VMSignal g_PikaVMSignal;
 volatile PikaObjState g_PikaObjState = {
@@ -51,19 +56,22 @@ volatile PikaObjState g_PikaObjState = {
 #endif
 };
 
+static volatile ShellConfig g_repl_shell;
+
 PikaObj* New_PikaStdData_Dict(Args* args);
 PikaObj* New_PikaStdData_dict_keys(Args* args);
 PikaObj* New_PikaStdData_List(Args* args);
 PikaObj* New_PikaStdData_Tuple(Args* args);
-void PikaStdData_Tuple___init__(PikaObj *self);
-void PikaStdData_List___init__(PikaObj *self);
-void PikaStdData_List_append(PikaObj *self, Arg* arg);
+void PikaStdData_Tuple___init__(PikaObj* self);
+void PikaStdData_List___init__(PikaObj* self);
+void PikaStdData_List_append(PikaObj* self, Arg* arg);
 void _mem_cache_deinit(void);
 void _VMEvent_deinit(void);
 void pikaGC_markObj(PikaGC* gc, PikaObj* self);
 void _pikaGC_mark(PikaGC* gc);
 void obj_dump(PikaObj* self);
 void Locals_deinit(PikaObj* self);
+static void disable_raw_mode(void);
 
 static enum shellCTRL __obj_shellLineHandler_REPL(PikaObj* self,
                                                   char* input_line,
@@ -197,6 +205,10 @@ int32_t obj_deinit(PikaObj* self) {
     pikaGC_unlock();
     if (bisRoot) {
         pikaGC_markSweep();
+        shConfig_deinit((ShellConfig*)&g_repl_shell);
+#if __linux
+        disable_raw_mode();
+#endif
     }
     return ret;
 }
@@ -636,6 +648,41 @@ static int set_disp_mode(int fd, int option) {
 
 static volatile uint8_t logo_printed = 0;
 
+#if __linux
+struct termios original_termios;
+
+static void enable_raw_mode(void) {
+    struct termios raw;
+
+    tcgetattr(STDIN_FILENO, &original_termios);  // 获取当前终端属性
+    raw = original_termios;
+    raw.c_lflag &= ~(ECHO | ICANON);           // 禁用回显和规范模式
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);  // 设置终端属性
+}
+
+static void disable_raw_mode(void) {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios);  // 恢复原始终端属性
+    printf("\n");
+}
+
+static void signal_handler(int sig) {
+    if (sig == SIGSEGV) {
+        printf("Segmentation fault");
+    } else if (sig == SIGINT) {
+        printf("Ctrl+C");
+    } else if (sig == SIGTERM) {
+        printf("SIGTERM");
+    } else if (sig == SIGHUP) {
+        printf("SIGHUP");
+    } else if (sig == SIGABRT) {
+        printf("Aborted");
+    }
+    disable_raw_mode();
+    exit(1);
+}
+
+#endif
+
 extern volatile PikaObj* __pikaMain;
 PikaObj* newRootObj(char* name, NewFun newObjFun) {
     g_PikaObjState.inRootObj = PIKA_TRUE;
@@ -643,7 +690,16 @@ PikaObj* newRootObj(char* name, NewFun newObjFun) {
     mem_pool_init();
 #endif
 #ifdef __linux
-    // set_disp_mode(STDIN_FILENO, 0);
+    signal(SIGINT, signal_handler);   // 捕获 SIGINT 信号（Ctrl+C）
+    signal(SIGTERM, signal_handler);  // 捕获 SIGTERM 信号
+    signal(SIGHUP, signal_handler);   // 捕获 SIGHUP 信号
+    signal(SIGSEGV, signal_handler);  // 捕获 SIGHUP 信号
+    signal(SIGABRT, signal_handler);
+    signal(SIGQUIT, signal_handler);
+    signal(SIGKILL, signal_handler);
+    signal(SIGTRAP, signal_handler);
+    signal(SIGHUP, signal_handler);
+    enable_raw_mode();
 #endif
     PikaObj* newObj = newNormalObj(newObjFun);
     if (!logo_printed) {
@@ -1285,42 +1341,159 @@ int16_t _do_stream_filter(PikaObj* self, ShellConfig* shell) {
 }
 #endif
 
+#if PIKA_SHELL_HISTORY_ENABLE
+ShellHistory* shHistory_create(int max_size) {
+    ShellHistory* self = (ShellHistory*)pikaMalloc(sizeof(ShellHistory));
+    self->max_size = max_size;
+    self->current = -1;
+    self->count = 0;
+    self->last_offset = 0;
+    self->cached_current = 0;
+    self->history = (char**)pikaMalloc(max_size * sizeof(char*));
+    return self;
+}
+
+void shHistory_destroy(ShellHistory* self) {
+    for (int i = 0; i < self->count; i++) {
+        pikaFree(self->history[i], strGetSize(self->history[i]) + 1);
+    }
+    pikaFree(self->history, sizeof(char*) * self->max_size);
+    pikaFree(self, sizeof(ShellHistory));
+}
+
+void shHistory_add(ShellHistory* self, char* command) {
+    if (self->count == self->max_size) {
+        pikaFree(self->history[0], strGetSize(self->history[0]) + 1);
+        pika_platform_memmove(self->history, self->history + 1,
+                              (self->max_size - 1) * sizeof(char*));
+        self->count--;
+    }
+
+    /* filter for empty command */
+    if (self->count > 0 && self->history[self->count - 1][0] == '\0') {
+        pikaFree(self->history[self->count - 1],
+                 strGetSize(self->history[self->count - 1]) + 1);
+        self->count--;
+    }
+
+    /* filter for same command */
+    if (self->count > 0 && strEqu(self->history[self->count - 1], command)) {
+        return;
+    }
+
+    self->history[self->count] = pikaMalloc(strGetSize(command) + 1);
+    pika_platform_memcpy(self->history[self->count], command,
+                         strGetSize(command) + 1);
+    self->count++;
+    self->current = self->count - 1;
+    self->last_offset = 0;
+}
+
+char* shHistory_get(ShellHistory* self, int offset) {
+    int actual_offset = offset + self->last_offset;
+    int index = self->current + actual_offset;
+    if (index < 0 || index >= self->count) {
+        return NULL;
+    }
+    self->last_offset = actual_offset;
+    return self->history[index];
+}
+
+char* shHistory_getPrev(ShellHistory* self) {
+    return shHistory_get(self, -1);
+}
+
+char* shHistory_getNext(ShellHistory* self) {
+    return shHistory_get(self, 1);
+}
+
+#endif
+
+#if __linux
+#define PIKA_BACKSPACE() printf("\b \b")
+#else
+#define PIKA_BACKSPACE() pika_platform_printf(" \b")
+#endif
+
+#if __linux
+#define PIKA_BACKSPACE_FORCE() printf("\b \b")
+#else
+#define PIKA_BACKSPACE_FORCE() pika_platform_printf("\b \b")
+#endif
+
+static void handle_history_navigation(char inputChar,
+                                      ShellConfig* shell,
+                                      PIKA_BOOL bIsUp) {
+#if PIKA_SHELL_HISTORY_ENABLE
+    if (NULL == shell->history) {
+        shell->history = shHistory_create(PIKA_SHELL_HISTORY_NUM);
+    }
+    if (0 == shell->history->cached_current) {
+        /* save the current line */
+        shHistory_add(shell->history, shell->lineBuff);
+        shell->history->cached_current = 1;
+    }
+    char* history_line = bIsUp ? shHistory_getPrev(shell->history)
+                               : shHistory_getNext(shell->history);
+    if (NULL == history_line) {
+        return;
+    }
+    /* move to the last position */
+    for (int i = 0; i < shell->line_position - shell->line_curpos; i++) {
+        _putc_cmd(PIKA_KEY_RIGHT, 1);
+    }
+    /* clear the current line */
+    for (int i = 0; i < shell->line_position; i++) {
+        PIKA_BACKSPACE_FORCE();
+    }
+    pika_platform_memcpy(shell->lineBuff, history_line,
+                         strGetSize(history_line) + 1);
+    /* show the previous line */
+    pika_platform_printf("%s", shell->lineBuff);
+    shell->line_position = strGetSize(history_line);
+    shell->line_curpos = shell->line_position;
+#endif
+    return;
+}
+
 enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
                                      char inputChar,
                                      ShellConfig* shell) {
     char* input_line = NULL;
     enum shellCTRL ctrl = SHELL_CTRL_CONTINUE;
-#if !(defined(__linux) || defined(_WIN32))
+#if __linux
+    printf("%c", inputChar);
+#elif !(defined(_WIN32))
     pika_platform_printf("%c", inputChar);
 #endif
     if (inputChar == '\n' && shell->lastChar == '\r') {
         ctrl = SHELL_CTRL_CONTINUE;
-        goto exit;
+        goto __exit;
     }
     if (inputChar == 0x1b) {
         shell->stat = PIKA_SHELL_STATE_WAIT_SPEC_KEY;
         ctrl = SHELL_CTRL_CONTINUE;
-        goto exit;
+        goto __exit;
     }
     if (shell->stat == PIKA_SHELL_STATE_WAIT_SPEC_KEY) {
         if (inputChar == 0x5b) {
             shell->stat = PIKA_SHELL_STATE_WAIT_FUNC_KEY;
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            goto __exit;
         }
         shell->stat = PIKA_SHELL_STATE_NORMAL;
     }
     if (shell->stat == PIKA_SHELL_STATE_WAIT_FUNC_KEY) {
-        if (inputChar == KEY_LEFT) {
+        if (inputChar == PIKA_KEY_LEFT) {
             if (shell->line_curpos) {
                 shell->line_curpos--;
             } else {
                 pika_platform_printf(" ");
             }
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            goto __exit;
         }
-        if (inputChar == KEY_RIGHT) {
+        if (inputChar == PIKA_KEY_RIGHT) {
             if (shell->line_curpos < shell->line_position) {
                 // pika_platform_printf("%c",
                 // shell->lineBuff[shell->line_curpos]);
@@ -1329,25 +1502,31 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
                 pika_platform_printf("\b");
             }
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            goto __exit;
         }
-        if (inputChar == KEY_UP) {
-            _putc_cmd(KEY_DOWN, 1);
+        if (inputChar == PIKA_KEY_UP) {
+            _putc_cmd(PIKA_KEY_DOWN, 1);
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            handle_history_navigation(inputChar, shell, PIKA_TRUE);
+            goto __exit;
         }
-        if (inputChar == KEY_DOWN) {
+        if (inputChar == PIKA_KEY_DOWN) {
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            handle_history_navigation(inputChar, shell, PIKA_FALSE);
+            goto __exit;
         }
     }
     if ((inputChar == '\b') || (inputChar == 127)) {
-        if (shell->line_position == 0) {
+        if (shell->line_curpos == 0) {
+#if __linux
+            printf("\b ");
+#else
             pika_platform_printf(" ");
+#endif
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            goto __exit;
         }
-        pika_platform_printf(" \b");
+        PIKA_BACKSPACE();
         shell->line_position--;
         shell->line_curpos--;
         pika_platform_memmove(shell->lineBuff + shell->line_curpos,
@@ -1358,10 +1537,11 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
             /* update screen */
             pika_platform_printf(shell->lineBuff + shell->line_curpos);
             pika_platform_printf(" ");
-            _putc_cmd(KEY_LEFT, shell->line_position - shell->line_curpos + 1);
+            _putc_cmd(PIKA_KEY_LEFT,
+                      shell->line_position - shell->line_curpos + 1);
         }
         ctrl = SHELL_CTRL_CONTINUE;
-        goto exit;
+        goto __exit;
     }
     if ((inputChar != '\r') && (inputChar != '\n')) {
         if (shell->line_position + 1 >= PIKA_LINE_BUFF_SIZE) {
@@ -1370,7 +1550,7 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
                 "'PIKA_LINE_BUFF_SIZE'\r\n");
             ctrl = SHELL_CTRL_EXIT;
             __clearBuff(shell);
-            goto exit;
+            goto __exit;
         }
         if ('\0' != inputChar) {
             pika_platform_memmove(shell->lineBuff + shell->line_curpos + 1,
@@ -1379,18 +1559,29 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
             shell->lineBuff[shell->line_position + 1] = 0;
             if (shell->line_curpos != shell->line_position) {
                 pika_platform_printf(shell->lineBuff + shell->line_curpos + 1);
-                _putc_cmd(KEY_LEFT, shell->line_position - shell->line_curpos);
+                _putc_cmd(PIKA_KEY_LEFT,
+                          shell->line_position - shell->line_curpos);
             }
             shell->lineBuff[shell->line_curpos] = inputChar;
             shell->line_position++;
             shell->line_curpos++;
         }
         ctrl = SHELL_CTRL_CONTINUE;
-        goto exit;
+        goto __exit;
     }
     if ((inputChar == '\r') || (inputChar == '\n')) {
 #if !(defined(__linux) || defined(_WIN32) || PIKA_SHELL_NO_NEWLINE)
         pika_platform_printf("\r\n");
+#endif
+#if PIKA_SHELL_HISTORY_ENABLE
+        if (NULL == shell->history) {
+            shell->history = shHistory_create(PIKA_SHELL_HISTORY_NUM);
+        }
+        if (shell->lineBuff[0] != '\0') {
+            shHistory_add(shell->history, shell->lineBuff);
+        }
+        shell->history->last_offset = 0;
+        shell->history->cached_current = 0;
 #endif
         /* still in block */
         if (shell->blockBuffName != NULL && shell->inBlock) {
@@ -1410,13 +1601,13 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
                 ctrl = shell->handler(self, input_line, shell);
                 __clearBuff(shell);
                 pika_platform_printf(">>> ");
-                goto exit;
+                goto __exit;
             } else {
                 pika_platform_printf("... ");
             }
             __clearBuff(shell);
             ctrl = SHELL_CTRL_CONTINUE;
-            goto exit;
+            goto __exit;
         }
         /* go in block */
         if (shell->blockBuffName != NULL && 0 != strGetSize(shell->lineBuff)) {
@@ -1428,16 +1619,16 @@ enum shellCTRL _inner_do_obj_runChar(PikaObj* self,
                 __clearBuff(shell);
                 pika_platform_printf("... ");
                 ctrl = SHELL_CTRL_CONTINUE;
-                goto exit;
+                goto __exit;
             }
         }
         shell->lineBuff[shell->line_position] = '\0';
         ctrl = shell->handler(self, shell->lineBuff, shell);
         pika_platform_printf("%s", shell->prefix);
         __clearBuff(shell);
-        goto exit;
+        goto __exit;
     }
-exit:
+__exit:
     shell->lastChar = inputChar;
     return ctrl;
 }
@@ -1485,16 +1676,15 @@ enum shellCTRL _do_obj_runChar(PikaObj* self,
 }
 
 enum shellCTRL obj_runChar(PikaObj* self, char inputChar) {
-    ShellConfig* shell = args_getStruct(self->list, "@shcfg");
+    ShellConfig* shell = args_getHeapStruct(self->list, "@shcfg");
     if (NULL == shell) {
         /* init the shell */
-        ShellConfig newShell = {
-            .prefix = ">>> ",
-            .blockBuffName = "@sh1",
-            .handler = __obj_shellLineHandler_REPL,
-        };
-        args_setStruct(self->list, "@shcfg", newShell);
-        shell = args_getStruct(self->list, "@shcfg");
+        ShellConfig newShell = {0};
+        newShell.prefix = ">>> ";
+        newShell.blockBuffName = "@sh1";
+        newShell.handler = __obj_shellLineHandler_REPL;
+        args_setHeapStruct(self->list, "@shcfg", newShell, shConfig_deinit);
+        shell = args_getHeapStruct(self->list, "@shcfg");
         _obj_runChar_beforeRun(self, shell);
     }
     return _do_obj_runChar(self, inputChar, shell);
@@ -1679,11 +1869,24 @@ static volatile ShellConfig g_repl_shell = {
     .handler = __obj_shellLineHandler_REPL,
     .prefix = ">>> ",
     .blockBuffName = "@sh0",
+#if PIKA_SHELL_HISTORY_ENABLE
+    .history = NULL,
+#endif
 };
 
 void pikaScriptShell_withGetchar(PikaObj* self, sh_getchar getchar_fn) {
     g_repl_shell.fn_getchar = getchar_fn;
     _do_pikaScriptShell(self, (ShellConfig*)&g_repl_shell);
+}
+
+int shConfig_deinit(ShellConfig* self) {
+#if PIKA_SHELL_HISTORY_ENABLE
+    if (NULL != self->history) {
+        shHistory_destroy(self->history);
+        self->history = NULL;
+    }
+#endif
+    return 0;
 }
 
 void pikaScriptShell(PikaObj* self) {
@@ -2471,8 +2674,8 @@ void pks_printVersion(void) {
 }
 
 void pks_getVersion(char* buff) {
-    pika_sprintf(buff, "%d.%d.%d", PIKA_VERSION_MAJOR,
-                          PIKA_VERSION_MINOR, PIKA_VERSION_MICRO);
+    pika_sprintf(buff, "%d.%d.%d", PIKA_VERSION_MAJOR, PIKA_VERSION_MINOR,
+                 PIKA_VERSION_MICRO);
 }
 
 void* obj_getStruct(PikaObj* self, char* name) {

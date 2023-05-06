@@ -164,6 +164,7 @@ static void consumer_task(void* pvParameters) {
 #endif
 
     PikaObj* root = newRootObj("root", New_PikaMain);
+    pks_printVersion();
     if (_pika_app_check()) {
         uint8_t* lib_buf = NULL;
         #if USING_APP_XIP
@@ -450,4 +451,7 @@ static int filesystem_init(void) {
     }
 
     return ret;
+}
+
+void pika_platform_panic_handle() {
 }
