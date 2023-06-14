@@ -15,19 +15,18 @@
 /* i2c interface
     TOUCH_I2C_FT6X36
     TOUCH_I2C_GT911
-    TOUCH_I2C_GSL2038
 */
 
 /* Select Touch Type */
-#define TOUCH_I2C_GSL2038
+#define TOUCH_I2C_FT6X36
 
 /* touch interface */
 #define TOUCH_INTERFACE_SPI 1
 #define TOUCH_INTERFACE_I2C 2
 
 /* touch interface pin config */
-#define TOUCH_I2C_SCL_PIN   GPIO_PIN_0
-#define TOUCH_I2C_SDA_PIN   GPIO_PIN_1
+#define TOUCH_I2C_SCL_PIN   GPIO_PIN_10
+#define TOUCH_I2C_SDA_PIN   GPIO_PIN_11
 
 /* now do not support */
 #if 0

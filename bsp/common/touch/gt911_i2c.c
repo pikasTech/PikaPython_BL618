@@ -138,15 +138,34 @@ int gt911_i2c_init(touch_coord_t *max_value)
             return -1;
         }
 #else
-        if (gt911_i2c_write_byte(GT911_CONFIG_REG, (void *)g_gt911_cfg_params, (sizeof(g_gt911_cfg_params) / sizeof(g_gt911_cfg_params[0])))) {
+    if(gt911_i2c_read_byte(GT911_CONFIG_VERSION_REG, data_buf, 1)){
+        printf("touch i2c read error\r\n");
+        return -1;
+    }
+    if(data_buf[0] < 0x42)
+    {
+        printf("config version 0x%x\n", data_buf[0]);
+        data_buf[0] = 0;
+        for(int i=0;i<sizeof(g_gt911_cfg_params);i++)data_buf[0]+=g_gt911_cfg_params[i];//计算校验和
+        data_buf[0]=(~data_buf[0])+1;
+        data_buf[1]=1; // 写入flash
+        if(gt911_i2c_write_byte(GT911_CONFIG_REG,(uint8_t*)g_gt911_cfg_params,(sizeof(g_gt911_cfg_params) / sizeof(g_gt911_cfg_params[0])))){     //发送寄存器配置
+            printf("write error");
             return -1;
         }
+        if(gt911_i2c_write_byte(GT911_CONFIG_CHECKSUM_REG,data_buf,2)){//写入校验和,和配置更新标记
+            printf("write error");
+            return -1;
+        }
+	}
 #endif
 
     } else {
         printf("Touch Product ID read fail!\r\n");
         return -1;
     }
+
+    bflb_mtimer_delay_ms(10);
 
     if (gt911_i2c_read_byte(GT911_FIRMWARE_VERSION_REG, data_buf, 2)) {
         return -1;

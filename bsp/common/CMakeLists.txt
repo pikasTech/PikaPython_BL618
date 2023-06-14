@@ -35,10 +35,23 @@ target_sources(app PRIVATE lcd/spi/ili9488_spi.c)
 target_sources(app PRIVATE lcd/spi/st7796_spi.c)
 target_sources(app PRIVATE lcd/spi/st7789v_spi.c)
 
-target_sources(app PRIVATE lcd/mipi_dpi/standard_dpi.c)
-target_sources(app PRIVATE lcd/mipi_dpi/ili9488_dpi.c)
-target_sources(app PRIVATE lcd/mipi_dpi/gc9503v_dpi.c)
 sdk_add_include_directories(lcd)
+endif()
+
+
+#BH1750 driver
+if(CONFIG_BSP_BH1750)
+target_sources(app PRIVATE BH1750/bh1750.c)
+
+sdk_add_include_directories(BH1750)
+endif()
+
+
+#ES8388 driver
+if(CONFIG_BSP_ES8388)
+target_sources(app PRIVATE ES8388/bsp_es8388.c)
+
+sdk_add_include_directories(ES8388)
 endif()
 
 # touch sensor driver
@@ -46,7 +59,6 @@ if(CONFIG_BSP_TOUCH)
 target_sources(app PRIVATE touch/touch.c)
 target_sources(app PRIVATE touch/ft6x36_i2c.c)
 target_sources(app PRIVATE touch/gt911_i2c.c)
-target_sources(app PRIVATE touch/gsl2038_i2c.c)
 sdk_add_include_directories(touch)
 endif()
 

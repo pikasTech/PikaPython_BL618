@@ -41,7 +41,7 @@
 #define lcd_spi_transmit_cmd_pixel_fill_async lcd_spi_hard_4_transmit_cmd_pixel_fill_async
 
 static lcd_spi_hard_4_init_t spi_para = {
-    .clock_freq = 40 * 1000 * 1000,
+    .clock_freq = 100 * 1000 * 1000,
 #if (ST7789V_SPI_PIXEL_FORMAT == 1)
     .pixel_format = LCD_SPI_LCD_PIXEL_FORMAT_RGB565,
 #elif (ST7789V_SPI_PIXEL_FORMAT == 2)
@@ -61,10 +61,30 @@ const st7789v_spi_init_cmd_t st7789v_spi_init_cmds[] = {
     { 0xFF, NULL, 120 },
 
     { 0x3A, "\x55", 1 }, /* pixel format */
+#if (ST7789V_DATA_FORMAT)
+    { 0xB0,"\x00\xF8",2}, 
+#else
+    { 0xB0,"\x00\xF0",2}, 
+#endif
+    { 0xB2, "\x0C\x0C\x00\x33\x33", 5 },
+    { 0xB7, "\x71", 1 },
+    { 0xBB, "\x3B", 1 },
+    { 0xC0, "\x2C", 1 },
+    { 0xC2, "\x01", 1 },
+    { 0xC3, "\x13", 1 },
+    { 0xC4, "\x20", 1 },
+    { 0xC6, "\x0F", 1 },
+    { 0xD0, "\xA4\xA1", 2 },
+    { 0xD6, "\xA1", 1 },
+
+    /* Gamma */
+    { 0xE0, "\xD0\x08\x0A\x0D\x0B\x07\x21\x33\x39\x39\x16\x16\x1F\x3C", 14 },
+    { 0xE1, "\xD0\x00\x03\x01\x00\x10\x21\x32\x38\x16\x14\x14\x20\x3D", 14 },
+
     { 0x21, NULL, 0 },
     { 0x29, NULL, 0 },
     { 0x36, "\x00", 1 },
-    { 0xC6, "\x00", 1 },
+    // { 0xC6, "\x0F", 1 },
 };
 
 /**
@@ -132,27 +152,27 @@ int st7789v_spi_set_dir(uint8_t dir, uint8_t mir_flag)
     switch (dir) {
         case 0:
             if (!mir_flag)
-                param = 0x08;
+                param = 0x00;
             else
-                param = 0x48;
+                param = 0x40;
             break;
         case 1:
             if (!mir_flag)
-                param = 0x28;
+                param = 0x20;
             else
-                param = 0xA8;
+                param = 0xA0;
             break;
         case 2:
             if (!mir_flag)
-                param = 0x88;
+                param = 0x80;
             else
-                param = 0xC8;
+                param = 0xC0;
             break;
         case 3:
             if (!mir_flag)
-                param = 0xE8;
+                param = 0xE0;
             else
-                param = 0x68;
+                param = 0x60;
 
             break;
         default:

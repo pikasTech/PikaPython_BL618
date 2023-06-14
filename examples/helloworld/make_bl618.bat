@@ -1,5 +1,5 @@
 @echo off
-@REM cd pikapython && rust-msc-latest-win10.exe && cd ..
+cd pikapython && rust-msc-latest-win10.exe && cd ..
 
 set "MAKE_PATH=%~dp0..\..\tools\make"
 set "NINJA_PATH=%~dp0..\..\tools\ninja"

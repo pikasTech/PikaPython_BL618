@@ -126,7 +126,8 @@ static struct image_sensor_command_s gc0308_init_list[] = {
     { 0x21, 0xf8 },
     { 0x22, 0x57 },
     //{ 0x24, 0xa0 }, //Cb Y Cr Y
-    { 0x24, 0xa2 }, //Y Cb Y Cr
+    // { 0x24, 0xa2 }, //Y Cb Y Cr
+    { 0x24, 0xa6 }, //RGB565
     { 0x25, 0x0f },
     //output sync_mode
     //{0x26 , 0x02}, //0x03  20101016 zhj

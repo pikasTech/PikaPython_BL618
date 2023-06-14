@@ -22,7 +22,9 @@
     LCD_SPI_ST7796
     LCD_SPI_ST7789V
 */
-#define LCD_SPI_ST7796
+/* #define LCD_SPI_ST7796 */
+
+#define LCD_SPI_ST7789V
 
 /* dbi ili9488 config */
 #if defined LCD_DBI_ILI9488
@@ -265,15 +267,21 @@
         0: Does not care about lcd hard reset
         1: use gpio to reset the lcd
     */
-    #define LCD_RESET_EN 1
+    #define LCD_RESET_EN 0
 
     /* LCD width and height */
-    #define ST7789V_SPI_W 320
-    #define ST7789V_SPI_H 480
+    #define ST7789V_SPI_W 240
+    #define ST7789V_SPI_H 320
 
     /* The offset of the area can be displayed */
     #define ST7789V_SPI_OFFSET_X 0
     #define ST7789V_SPI_OFFSET_Y 0
+
+    /*LCD data MSB or LSB
+        0 : MSB
+        1 : LSB
+    */
+    #define ST7789V_DATA_FORMAT 1
 
 
 /* spi st7796 config */
@@ -293,12 +301,11 @@
         0: Does not care about lcd hard reset
         1: use gpio to reset the lcd
     */
-    // #define LCD_RESET_EN 1
+    #define LCD_RESET_EN 1
 
-    #define PIXEL_DEVIDE 1
     /* LCD width and height */
-    #define ST7796_SPI_W (320 / PIXEL_DEVIDE)
-    #define ST7796_SPI_H (320 / PIXEL_DEVIDE)
+    #define ST7796_SPI_W 320
+    #define ST7796_SPI_H 480
 
     /* The offset of the area can be displayed */
     #define ST7796_SPI_OFFSET_X 0
@@ -308,7 +315,7 @@
         0: disable
         1: enable
     */
-   #define ST7796_SPI_COLOR_REVERSAL 1
+   #define ST7796_SPI_COLOR_REVERSAL 0
 
 #endif
 
@@ -447,14 +454,14 @@
     #define LCD_SPI_HARD_4_DMA_NAME "dma0_ch3"
 
     /* The maximum pixel cnt to be transferred affects the number of LLI memory pools */
-    #define LCD_SPI_HARD_4_PIXEL_CNT_MAX ((320 / PIXEL_DEVIDE) * (320 / PIXEL_DEVIDE))
+    #define LCD_SPI_HARD_4_PIXEL_CNT_MAX (800 * 640)
 
     /* spi pin, hardware controlled */
-    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_9
+    #define LCD_SPI_HARD_4_PIN_CLK   GPIO_PIN_17
     #define LCD_SPI_HARD_4_PIN_DAT   GPIO_PIN_19
     /* cs/dc pin, software controlled */
-    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_17
-    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_18
+    #define LCD_SPI_HARD_4_PIN_CS   GPIO_PIN_18
+    #define LCD_SPI_HARD_4_PIN_DC   GPIO_PIN_20
 
 #endif
 
@@ -462,7 +469,7 @@
 #if (defined(LCD_RESET_EN) && LCD_RESET_EN)
 
 /* lcd reset signal pin, please leave blank if not needed */
-#define LCD_RESET_PIN GPIO_PIN_2
+#define LCD_RESET_PIN GPIO_PIN_12
 
 /* lcd reset signal active level
     0: lcd reset at low level

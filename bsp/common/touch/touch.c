@@ -21,14 +21,9 @@
  *
  */
 #include "touch.h"
-static int touch_inited = 0;
 
 int touch_init(touch_coord_t *max_value)
 {
-    if (touch_inited == 1){
-        return 0;
-    }
-    touch_inited = 1;
     return _TOUCH_FUNC_DEFINE(init, max_value);
 }
 

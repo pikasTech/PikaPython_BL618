@@ -55,58 +55,34 @@ static lcd_spi_hard_4_init_t spi_para = {
 
 #endif
 const st7796_spi_init_cmd_t st7796_spi_init_cmds[] = {
-    { 0xF0, "\xC3", 1 },
-    { 0xF0, "\x96", 1 },
-    { 0x36, "\x48", 1 },
-    { 0x3A, "\x55", 1 }, /* RGB565 */
-    { 0xB6, "\x80\x00\x27", 3 },
-    { 0xB7, "\xC6", 1 },
-    { 0xE8, "\x40\x84\x1D\x21\x28\x13\x3f\x33", 8 },
-    { 0xC0, "\xA0\x07", 2 },
-    { 0xC1, "\x09", 1 },
-    { 0xC2, "\xA5", 1 },
-    { 0xC5, "\x08", 1 },
-    { 0xE0, "\xF0\x17\x1B\x0B\x0A\x08\x37\x44\x4B\x3C\x17\x16\x2E\x35", 14 }, /* Set Gamma */
-    { 0XE1, "\xF0\x1A\x1D\x08\x06\x10\x37\x33\x4A\x32\x10\x11\x29\x31", 14 }, /* Set Gamma */
-    { 0xF0, "\x3C", 1 },
-    { 0x35, "\x00", 1 },
-#if ST7796_SPI_COLOR_REVERSAL
-    { 0xB4, "\x00", 1 },
-    { 0x21, NULL, 0 },
-#endif
+    { 0x01, NULL, 0 },
+    { 0xFF, NULL, 10 },
     { 0x11, NULL, 0 }, /* Exit sleep */
     { 0xFF, NULL, 120 },
+
+    { 0xF0, "\xC3", 1 },
+    { 0xF0, "\x96", 1 },
+
+    { 0x36, "\x48", 1 },
+
+    { 0x3A, "\x05", 1 }, /* RGB565 */
+    { 0xE6, "\x0F\xF2\x3F\x4F\x4F\x28\x0E\x00", 8 },
+    { 0xC5, "\x2A", 1 },
+
+/* Color reversal */
+#if ST7796_SPI_COLOR_REVERSAL
+    { 0xB4, "\x01", 1 },
+    { 0x21, NULL, 0 },
+#endif
+
+    { 0xE0, "\xF0\x03\x0A\x11\x14\x1C\x3B\x55\x4A\x0A\x13\x14\x1C\x1F", 14 }, /* Set Gamma */
+    { 0XE1, "\xF0\x03\x0A\x0C\x0C\x09\x36\x54\x49\x0F\x1B\x18\x1B\x1F", 14 }, /* Set Gamma */
+
+    { 0xF0, "\x3C", 1 },
+    { 0xF0, "\x69", 1 },
+
     { 0x29, NULL, 0 }, /* Display on */
-    { 0x2C, NULL, 0 }, /* Display on */
-
-//     { 0x01, NULL, 0 },
-//     { 0xFF, NULL, 10 },
-//     { 0x11, NULL, 0 }, /* Exit sleep */
-//     { 0xFF, NULL, 120 },
-
-//     { 0xF0, "\xC3", 1 },
-//     { 0xF0, "\x96", 1 },
-
-//     { 0x36, "\x48", 1 },
-
-//     { 0x3A, "\x05", 1 }, /* RGB565 */
-//     { 0xE6, "\x0F\xF2\x3F\x4F\x4F\x28\x0E\x00", 8 },
-//     { 0xC5, "\x2A", 1 },
-
-// /* Color reversal */
-// #if ST7796_SPI_COLOR_REVERSAL
-//     { 0xB4, "\x01", 1 },
-//     { 0x21, NULL, 0 },
-// #endif
-
-//     { 0xE0, "\xF0\x03\x0A\x11\x14\x1C\x3B\x55\x4A\x0A\x13\x14\x1C\x1F", 14 }, /* Set Gamma */
-//     { 0XE1, "\xF0\x03\x0A\x0C\x0C\x09\x36\x54\x49\x0F\x1B\x18\x1B\x1F", 14 }, /* Set Gamma */
-
-//     { 0xF0, "\x3C", 1 },
-//     { 0xF0, "\x69", 1 },
-
-//     { 0x29, NULL, 0 }, /* Display on */
-//     { 0xFF, NULL, 10 },
+    { 0xFF, NULL, 10 },
 };
 
 /**
