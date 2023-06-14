@@ -21,4 +21,4 @@ IF NOT EXIST "%~dp0..\..\tools\toolchain_gcc_t-head_windows" (
     git clone https://gitee.com/bouffalolab/toolchain_gcc_t-head_windows "%~dp0..\..\tools\toolchain_gcc_t-head_windows"
 )
 
-make ninja CHIP=bl616 BOARD=bl616dk
+make ninja CHIP=bl616 BOARD=bl616g0

@@ -55,8 +55,8 @@
 
 /* bsp config for PikaPython */
 #define USING_USB_CDC 1
-#define USING_LVGL 1
-#define USING_TOUCH 1
+// #define USING_LVGL 1
+// #define USING_TOUCH 1
 #define USING_APP_XIP 1
 
 #define USING_KEY_ERAISE 0
