@@ -17,41 +17,5 @@
 
 PikaObj *New_PikaStdLib_SysObj(Args *args);
 
-Arg* PikaStdLib_SysObj___getitem__(PikaObj *self, Arg* obj, Arg* key);
-Arg* PikaStdLib_SysObj___setitem__(PikaObj *self, Arg* obj, Arg* key, Arg* val);
-Arg* PikaStdLib_SysObj_abs(PikaObj *self, Arg* val);
-PIKA_BOOL PikaStdLib_SysObj_bool(PikaObj *self, Arg* arg);
-Arg* PikaStdLib_SysObj_bytes(PikaObj *self, Arg* val);
-char* PikaStdLib_SysObj_cformat(PikaObj *self, char* fmt, PikaTuple* var);
-char* PikaStdLib_SysObj_chr(PikaObj *self, int val);
-void PikaStdLib_SysObj_clear(PikaObj *self);
-Arg* PikaStdLib_SysObj_dict(PikaObj *self, PikaTuple* val);
-PikaObj* PikaStdLib_SysObj_dir(PikaObj *self, Arg* obj);
-Arg* PikaStdLib_SysObj_eval(PikaObj *self, char* code);
-void PikaStdLib_SysObj_exec(PikaObj *self, char* code);
-void PikaStdLib_SysObj_exit(PikaObj *self);
-pika_float PikaStdLib_SysObj_float(PikaObj *self, Arg* arg);
-void PikaStdLib_SysObj_gcdump(PikaObj *self);
-Arg* PikaStdLib_SysObj_getattr(PikaObj *self, PikaObj* obj, char* name);
-int PikaStdLib_SysObj_hasattr(PikaObj *self, PikaObj* obj, char* name);
-void PikaStdLib_SysObj_help(PikaObj *self, char* name);
-char* PikaStdLib_SysObj_hex(PikaObj *self, int val);
-int PikaStdLib_SysObj_id(PikaObj *self, Arg* obj);
-char* PikaStdLib_SysObj_input(PikaObj *self, PikaTuple* info);
-int PikaStdLib_SysObj_int(PikaObj *self, Arg* arg, PikaTuple* base);
-Arg* PikaStdLib_SysObj_iter(PikaObj *self, Arg* arg);
-int PikaStdLib_SysObj_len(PikaObj *self, Arg* arg);
-Arg* PikaStdLib_SysObj_list(PikaObj *self, PikaTuple* val);
-Arg* PikaStdLib_SysObj_max(PikaObj *self, PikaTuple* val);
-Arg* PikaStdLib_SysObj_min(PikaObj *self, PikaTuple* val);
-PikaObj* PikaStdLib_SysObj_open(PikaObj *self, char* path, char* mode);
-int PikaStdLib_SysObj_ord(PikaObj *self, char* val);
-void PikaStdLib_SysObj_print(PikaObj *self, PikaTuple* val, PikaDict* ops);
-Arg* PikaStdLib_SysObj_range(PikaObj *self, PikaTuple* ax);
-void PikaStdLib_SysObj_reboot(PikaObj *self);
-void PikaStdLib_SysObj_setattr(PikaObj *self, PikaObj* obj, char* name, Arg* val);
-char* PikaStdLib_SysObj_str(PikaObj *self, Arg* arg);
-Arg* PikaStdLib_SysObj_tuple(PikaObj *self, Arg* arg);
-Arg* PikaStdLib_SysObj_type(PikaObj *self, Arg* arg);
 
 #endif

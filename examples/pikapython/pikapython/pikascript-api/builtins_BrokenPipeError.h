@@ -9,14 +9,13 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __PikaStdLib_StringObj__H
-#define __PikaStdLib_StringObj__H
+#ifndef __builtins_BrokenPipeError__H
+#define __builtins_BrokenPipeError__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_PikaStdLib_StringObj(Args *args);
+PikaObj *New_builtins_BrokenPipeError(Args *args);
 
-Arg* PikaStdLib_StringObj___next__(PikaObj *self);
 
 #endif

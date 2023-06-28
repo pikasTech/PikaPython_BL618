@@ -98,7 +98,7 @@ PIKA_RES args_setStr(Args* self, char* name, char* strIn) {
 
 PIKA_RES args_setNone(Args* self, char* name) {
     PIKA_RES errCode = PIKA_RES_OK;
-    Arg* argNew = arg_newNull();
+    Arg* argNew = arg_newNone();
     arg_setName(argNew, name);
     args_setArg(self, argNew);
     return errCode;
@@ -202,7 +202,7 @@ int64_t args_getInt(Args* self, char* name) {
     return _PIKA_INT_ERR;
 }
 
-PIKA_BOOL args_getBool(Args* self, char* name) {
+pika_bool args_getBool(Args* self, char* name) {
     Arg* arg = args_getArg(self, name);
     if (NULL == arg) {
         return _PIKA_BOOL_ERR;
@@ -635,6 +635,16 @@ size_t pikaList_getSize(PikaList* self) {
         return 0;
     }
     return args_getInt(&self->super, "top");
+}
+
+void objList_append(PikaObj* self, Arg* arg) {
+    PikaList* list = obj_getPtr(self, "list");
+    pikaList_append(list, arg);
+}
+
+void objList_init(PikaObj* self) {
+    PikaList* list = New_pikaList();
+    obj_setPtr(self, "list", list);
 }
 
 void pikaList_reverse(PikaList* self) {

@@ -14,27 +14,27 @@
 #include <stdlib.h>
 
 volatile PikaObj *__pikaMain;
-PikaObj *pikaScriptInit(void){
-    __platform_printf("======[pikascript packages installed]======\r\n");
-    pks_printVersion();
-    __platform_printf("PikaMath==v0.2.1\r\n");
-    __platform_printf("PikaStdDevice==v2.3.7\r\n");
-    __platform_printf("PikaStdLib==latest\r\n");
-    __platform_printf("_thread==v0.0.4\r\n");
-    __platform_printf("binascii==v0.0.2\r\n");
-    __platform_printf("configparser==v0.2.1\r\n");
-    __platform_printf("json==v0.1.1\r\n");
-    __platform_printf("modbus==v0.0.5\r\n");
-    __platform_printf("network==v0.1.2\r\n");
-    __platform_printf("pika_cjson==v1.2.2\r\n");
-    __platform_printf("pika_lvgl==v0.5.0\r\n");
-    __platform_printf("random==v0.1.2\r\n");
-    __platform_printf("re==v0.1.2\r\n");
-    __platform_printf("requests==v1.0.0\r\n");
-    __platform_printf("socket==v0.1.4\r\n");
-    __platform_printf("time==v0.1.5\r\n");
-    __platform_printf("unittest==v0.1.4\r\n");
-    __platform_printf("===========================================\r\n");
+PikaObj *pikaPythonInit(void){
+    pika_platform_printf("======[pikapython packages installed]======\r\n");
+    pika_printVersion();
+    pika_platform_printf("PikaMath==v0.2.1\r\n");
+    pika_platform_printf("PikaStdDevice==v2.3.7\r\n");
+    pika_platform_printf("PikaStdLib==latest\r\n");
+    pika_platform_printf("_thread==v0.0.4\r\n");
+    pika_platform_printf("binascii==v0.0.2\r\n");
+    pika_platform_printf("configparser==v0.2.1\r\n");
+    pika_platform_printf("json==v0.1.1\r\n");
+    pika_platform_printf("modbus==v0.0.5\r\n");
+    pika_platform_printf("network==v0.1.2\r\n");
+    pika_platform_printf("pika_cjson==v1.2.2\r\n");
+    pika_platform_printf("pika_lvgl==v0.5.0\r\n");
+    pika_platform_printf("random==v0.1.2\r\n");
+    pika_platform_printf("re==v0.1.2\r\n");
+    pika_platform_printf("requests==v1.0.0\r\n");
+    pika_platform_printf("socket==v0.1.4\r\n");
+    pika_platform_printf("time==v0.1.5\r\n");
+    pika_platform_printf("unittest==v0.1.4\r\n");
+    pika_platform_printf("===========================================\r\n");
     PikaObj* pikaMain = newRootObj("pikaMain", New_PikaMain);
     __pikaMain = pikaMain;
     extern unsigned char pikaModules_py_a[];

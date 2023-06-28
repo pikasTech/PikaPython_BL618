@@ -383,11 +383,16 @@ PIKA_WEAK PIKA_BOOL pika_hook_arg_cache_filter(void* self) {
     return PIKA_TRUE;
 }
 
-PIKA_WEAK void pika_platform_thread_delay(void) {
-#if defined(__linux) || defined(_WIN32)
+PIKA_WEAK void pika_thread_idle_hook(void) {
     return;
-#elif PIKA_FREERTOS_ENABLE
+}
+
+PIKA_WEAK void pika_platform_thread_yield(void) {
+    pika_thread_idle_hook();
+#if PIKA_FREERTOS_ENABLE
     vTaskDelay(1);
+#elif defined(__linux) || defined(_WIN32)
+    return;
 #else
     return;
 #endif
@@ -432,19 +437,37 @@ PIKA_WEAK pika_platform_thread_t* pika_platform_thread_init(
 
     return thread;
 #elif PIKA_FREERTOS_ENABLE
-    BaseType_t err;
     pika_platform_thread_t* thread;
 
     thread = pikaMalloc(sizeof(pika_platform_thread_t));
+#if PIKA_THREAD_MALLOC_STACK_ENABLE
+    thread->thread_stack_size = stack_size;
+    thread->thread_stack = pikaMalloc(thread->thread_stack_size);
+#endif
 
     (void)tick;
 
-    err = xTaskCreate(entry, name, stack_size, param, priority, thread->thread);
+#if PIKA_THREAD_MALLOC_STACK_ENABLE
+    thread->thread =
+        xTaskCreateStatic(entry, name, stack_size, param, priority,
+                          thread->thread_stack, &thread->task_buffer);
+#else
+    int err =
+        xTaskCreate(entry, name, stack_size, param, priority, &thread->thread);
+#endif
 
+#if PIKA_THREAD_MALLOC_STACK_ENABLE
+    if (NULL == thread->thread) {
+        pikaFree(thread->thread_stack, thread->thread_stack_size);
+        pikaFree(thread, sizeof(pika_platform_thread_t));
+        return NULL;
+    }
+#else
     if (pdPASS != err) {
         pikaFree(thread, sizeof(pika_platform_thread_t));
         return NULL;
     }
+#endif
 
     return thread;
 #else
@@ -496,6 +519,7 @@ PIKA_WEAK void pika_platform_thread_destroy(pika_platform_thread_t* thread) {
 #ifdef __linux
     if (NULL != thread) {
         pthread_detach(thread->thread);
+        // pthread_join(thread->thread, NULL);
         pikaFree(thread, sizeof(pika_platform_thread_t));
         thread = NULL;
         return;
@@ -515,8 +539,12 @@ PIKA_WEAK void pika_platform_thread_exit(pika_platform_thread_t* thread) {
 #ifdef __linux
     return pika_platform_thread_destroy(thread);
 #elif PIKA_FREERTOS_ENABLE
-    vTaskDelete(NULL);  // test on esp32c3
-    // vTaskDelete(thread->thread);
+    // vTaskDelete(NULL);  // test on esp32c3
+    if (NULL == thread) {
+        vTaskDelete(NULL);
+        return;
+    }
+    vTaskDelete(thread->thread);
     return;
 #else
     WEAK_FUNCTION_NEED_OVERRIDE_ERROR();

@@ -25,6 +25,6 @@ void pika_lvgl_canvas_get_px(PikaObj *self, int x, int y, PikaObj* color, int op
 void pika_lvgl_canvas_set_buffer(PikaObj *self, Arg* buf, int w, int h, int cf);
 void pika_lvgl_canvas_set_palette(PikaObj *self, int id, PikaObj* c);
 void pika_lvgl_canvas_set_px(PikaObj *self, int x, int y, PikaObj* color, int opa);
-void pika_lvgl_canvas_transform(PikaObj *self, PikaObj* img, int angle, int zoom, int offset_x, int offset_y, int pivot_x, int pivot_y, PIKA_BOOL antialias);
+void pika_lvgl_canvas_transform(PikaObj *self, PikaObj* img, int angle, int zoom, int offset_x, int offset_y, int pivot_x, int pivot_y, pika_bool antialias);
 
 #endif

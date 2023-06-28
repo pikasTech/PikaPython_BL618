@@ -94,10 +94,10 @@ const char bracketStart[] = {'(', '[', '{', '\'', '\"'};
 const char bracketEnd[] = {')', ']', '}', '\'', '\"'};
 #define BRACKET_TYPE_NUM (sizeof(bracketStart) / sizeof(char))
 
-int _strCountSign(char* strIn, char sign, PIKA_BOOL bracketDepth0) {
+int _strCountSign(char* strIn, char sign, pika_bool bracketDepth0) {
     int32_t iCount = 0;
     int32_t iTotalDepth = 0;
-    PIKA_BOOL bEscaped = PIKA_FALSE;
+    pika_bool bEscaped = pika_false;
     for (size_t i = 0; strIn[i] != '\0'; i++) {
         if (!bracketDepth0) {
             if (strIn[i] == sign) {
@@ -122,7 +122,7 @@ int _strCountSign(char* strIn, char sign, PIKA_BOOL bracketDepth0) {
         if (cCurrentChar == sign && iTotalDepth == 0) {
             iCount++;
         }
-        bEscaped = PIKA_FALSE;
+        bEscaped = pika_false;
     }
     return iCount;
 }
@@ -245,6 +245,10 @@ int32_t strIsStartWith(char* str, char* strStart) {
 
 int32_t strEqu(char* str1, char* str2) {
     if (NULL == str1 || NULL == str2) {
+        return 0;
+    }
+    if (str1[0] != str2[0]) {
+        /* fast return */
         return 0;
     }
     return !strcmp(str1, str2);

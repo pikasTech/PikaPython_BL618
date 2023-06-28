@@ -43,16 +43,29 @@ extern "C" {
 #include <unistd.h>
 #endif
 
-/* clang-format off */
-#if PIKA_ASSERT_ENABLE
-    #define pika_assert(expr) \
+#define PIKA_ASSERT_2(expr, msg, ...) \
+    if(!(expr)) { \
+        pika_platform_printf((char*)"Assertion \"%s\" failed, in function: %s(). \r\n  (at %s:%d)\n" msg, #expr, __FUNCTION__, __FILE__, __LINE__, __VA_ARGS__); \
+        pika_platform_abort_handler(); \
+        abort(); \
+    }
+
+#define PIKA_ASSERT_1(expr) \
     if(!(expr)) { \
         pika_platform_printf((char*)"Assertion \"%s\" failed, in function: %s(). \r\n  (at %s:%d)\n", #expr, __FUNCTION__, __FILE__, __LINE__); \
         pika_platform_abort_handler(); \
         abort(); \
     }
+
+#define GET_MACRO(_1, _2, NAME, ...) NAME
+
+/* clang-format off */
+#if PIKA_ASSERT_ENABLE
+    #define pika_assert PIKA_ASSERT_1
+    #define pika_assert_msg PIKA_ASSERT_2
 #else
     #define pika_assert(...) (void)0;
+    #define pika_assert_msg(...) (void)0;
 #endif
 /* clang-format on */
 
@@ -111,9 +124,9 @@ typedef enum {
 /* clang-format off */
 
 /* pikascript bool type */
-#define PIKA_BOOL int64_t
-#define PIKA_TRUE 1
-#define PIKA_FALSE 0
+#define pika_bool int64_t 
+#define pika_true 1
+#define pika_false 0 
 #define _PIKA_BOOL_ERR -1
 
 #define _PIKA_INT_ERR (-999999999)
@@ -218,6 +231,11 @@ typedef struct pika_platform_thread {
 #include "task.h"
 typedef struct pika_platform_thread {
     TaskHandle_t thread;
+#if PIKA_THREAD_MALLOC_STACK_ENABLE
+    uint32_t thread_stack_size;
+    uint8_t* thread_stack;
+    StaticTask_t task_buffer;
+#endif
 } pika_platform_thread_t;
 #else
 typedef struct pika_platform_thread {
@@ -232,7 +250,7 @@ pika_platform_thread_t* pika_platform_thread_init(const char* name,
                                                   unsigned int priority,
                                                   unsigned int tick);
 uint64_t pika_platform_thread_self(void);
-void pika_platform_thread_delay(void);
+void pika_platform_thread_yield(void);
 void pika_platform_thread_startup(pika_platform_thread_t* thread);
 void pika_platform_thread_stop(pika_platform_thread_t* thread);
 void pika_platform_thread_start(pika_platform_thread_t* thread);

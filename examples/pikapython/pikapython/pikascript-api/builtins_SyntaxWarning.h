@@ -9,14 +9,13 @@
  * https://pikadoc.readthedocs.io/zh/latest/PikaScript%20%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0.html
  */
 
-#ifndef __PikaStdLib_RangeObj__H
-#define __PikaStdLib_RangeObj__H
+#ifndef __builtins_SyntaxWarning__H
+#define __builtins_SyntaxWarning__H
 #include <stdio.h>
 #include <stdlib.h>
 #include "PikaObj.h"
 
-PikaObj *New_PikaStdLib_RangeObj(Args *args);
+PikaObj *New_builtins_SyntaxWarning(Args *args);
 
-Arg* PikaStdLib_RangeObj___next__(PikaObj *self);
 
 #endif
